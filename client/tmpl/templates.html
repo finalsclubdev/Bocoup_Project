@@ -1,0 +1,22 @@
+<div class="template" id="header">
+  <h1>FinalsClub</h1>
+  {{#if userid}}
+  <form method="POST" action="logout">
+    <button type="submit">Log Out {{userid}}</button>
+  </form>
+  {{/if}}
+</div>
+
+
+<div class="template" id="login">
+  <h2>Please identify yourself</h2>
+  <form method="POST" action="login">
+    <input type="text" name="userid" placeholder="Enter your name" required>
+    <button type="submit">Submit</button>
+  </form>
+</div>
+
+<div class="template" id="groups">
+  <h2>Available Groups</h2>
+  Here's the list of groups
+</div>
