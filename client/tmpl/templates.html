@@ -37,10 +37,19 @@
 <div class="template" id="group">
   <h2>{{name}}</h2>
   <a href="#" class="back">Back</a>
-  Documents
+  <h3>Documents</h3>
+  <li><a href="#document/">Create</a></li>
   <ul>
-  {{#each documents}}
-    <li><a href="#document/{{id}}">{{name}}</a></li>
+  {{#each docs}}
+    <li><a href="#document/{{id}}">{{title}}</a></li>
   {{/each}}
   </ul>
+</div>
+
+<div class="template" id="doc">
+  <form>
+    <h2>{{title}}</h2>
+    <textarea name="content" cols="50" rows="20">{{content}}</textarea>
+    <a href="#" class="back">Done</a>
+  </form>
 </div>

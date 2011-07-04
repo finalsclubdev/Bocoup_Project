@@ -18,7 +18,8 @@
             "": "home",
             "login": "login",
             "groups": "groupList",
-            "group/:id": "group"
+            "group/:id": "group",
+            "document/:id": "doc"
 
           },
           home: function() {
@@ -35,7 +36,11 @@
           group: function(id) {
             var group = FC.groups.get(id);
             FC.main.transition( group ? new GroupView({group: group}) : new NotFoundView() );
-
+          },
+          doc: function(id) {
+            var doc = FC.docs.get(id) || FC.docs.create( {title: "Sample Document "+ Math.round(Math.random() * 10000)} );
+            console.log(doc);
+            FC.main.transition( new DocView({doc: doc}) );
           }
         }),
 
@@ -79,7 +84,20 @@
           localStorage: new Backbone.Store("Groups")
         }),
 
+        Doc = Backbone.Model.extend({
+          defaults: {
+            title: "",
+            content: ""
+          }
+        }),
+
+        DocCollection = Backbone.Collection.extend({
+          model: Doc,
+          localStorage: new Backbone.Store("Docs")
+        }),
+
         HeaderView = Backbone.View.extend({
+
           initialize: function() {
             _.bindAll(this);
             this.render();
@@ -161,22 +179,42 @@
           },
           template: TMPL.group,
           render: function() {
-            var data = this.options.group.toJSON();
+            var data = _.extend( this.options.group.toJSON(), {docs: FC.docs.toJSON()} );
             $(this.el).html(this.template(data));
             return this;
+          }
+        }),
+
+        DocView = Backbone.View.extend({
+          initialize: function() {
+            _.bindAll(this);
+          },
+          template: TMPL.doc,
+          render: function() {
+            var data = this.options.doc.toJSON();
+            $(this.el).html(this.template(data));
+            return this;
+          },
+          events: {
+            "keyup textarea": "edit"
+          },
+          edit: function(e) {
+            this.options.doc.set( {content: $(e.target).val()}) ;
+            this.options.doc.save();
           }
         }),
 
         FC = window.FC = {
           router: new Router(),
           users: new UserCollection(),
-          groups: new GroupCollection()
+          groups: new GroupCollection(),
+          docs: new DocCollection()
         };
 
     $(function() {
 
       FC.users.fetch();
-
+      FC.docs.fetch();
       FC.groups.fetch({
         success: function() {
           // Temporary test data for development
