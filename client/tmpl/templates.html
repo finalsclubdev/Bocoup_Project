@@ -7,6 +7,14 @@
   {{/if}}
 </div>
 
+<div class="template" id="notFound">
+  <h2>Not Found</h2>
+  <p>The resource you requested could not be found</p>
+  <p>
+  <a href="#">Home</a>
+  <a href="#" class="back">Back</a>
+  </p>
+</div>
 
 <div class="template" id="login">
   <h2>Please identify yourself</h2>
@@ -16,7 +24,23 @@
   </form>
 </div>
 
-<div class="template" id="groups">
+<div class="template" id="groupList">
   <h2>Available Groups</h2>
   Here's the list of groups
+  <ul>
+  {{#each groups}}
+    <li><a href="#group/{{id}}">{{name}}</a></li>
+  {{/each}}
+  </ul>
+</div>
+
+<div class="template" id="group">
+  <h2>{{name}}</h2>
+  <a href="#" class="back">Back</a>
+  Documents
+  <ul>
+  {{#each documents}}
+    <li><a href="#document/{{id}}">{{name}}</a></li>
+  {{/each}}
+  </ul>
 </div>

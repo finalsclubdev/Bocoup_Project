@@ -17,7 +17,8 @@
           routes: {
             "": "home",
             "login": "login",
-            "groups": "groups"
+            "groups": "groupList",
+            "group/:id": "group"
 
           },
           home: function() {
@@ -28,8 +29,13 @@
           login: function() {
             FC.main.transition( new LoginView() );
           },
-          groups: function(e) {
-            FC.main.transition( new GroupsView() );
+          groupList: function(e) {
+            FC.main.transition( new GroupListView() );
+          },
+          group: function(id) {
+            var group = FC.groups.get(id);
+            FC.main.transition( group ? new GroupView({group: group}) : new NotFoundView() );
+
           }
         }),
 
@@ -38,9 +44,16 @@
             _.bindAll(this);
             FC.header = new HeaderView( {el: $(this.el).prev()[0]} );
           },
+          events: {
+            "click a.back": "back"
+          },
           transition: function(view) {
             FC.header.render();
             $(this.el).html( view.render().el );
+          },
+          back: function(e) {
+            e.preventDefault();
+            history.go( -1 );
           }
         }),
 
@@ -53,7 +66,17 @@
         UserCollection = Backbone.Collection.extend({
           model: User,
           localStorage: new Backbone.Store("Users")
+        }),
 
+        Group = Backbone.Model.extend({
+          defaults: {
+            name: ""
+          }
+        }),
+
+        GroupCollection = Backbone.Collection.extend({
+          model: Group,
+          localStorage: new Backbone.Store("Groups")
         }),
 
         HeaderView = Backbone.View.extend({
@@ -105,12 +128,40 @@
           }
         }),
 
-        GroupsView = Backbone.View.extend({
+        NotFoundView = Backbone.View.extend({
           initialize: function() {
             _.bindAll(this);
           },
-          template: TMPL.groups,
+          template: TMPL.notFound,
           render: function() {
+            $(this.el).html(this.template());
+            return this;
+          }
+        }),
+
+        GroupListView = Backbone.View.extend({
+          initialize: function() {
+            _.bindAll(this);
+          },
+          template: TMPL.groupList,
+          render: function() {
+            FC.groups.fetch({
+              success: _.bind(function(collection,groups) {
+                var data = { groups: FC.groups.toJSON() };
+                $(this.el).html(this.template(data));
+              },this)
+            });
+            return this;
+          }
+        }),
+
+        GroupView = Backbone.View.extend({
+          initialize: function() {
+            _.bindAll(this);
+          },
+          template: TMPL.group,
+          render: function() {
+            var data = this.options.group.toJSON();
             $(this.el).html(this.template(data));
             return this;
           }
@@ -118,12 +169,24 @@
 
         FC = window.FC = {
           router: new Router(),
-          users: new UserCollection()
+          users: new UserCollection(),
+          groups: new GroupCollection()
         };
 
     $(function() {
 
       FC.users.fetch();
+
+      FC.groups.fetch({
+        success: function() {
+          // Temporary test data for development
+          if (!FC.groups.length) {
+            FC.groups.create( {name: "Music Theory 201"} );
+            FC.groups.create( {name: "Ad Hoc Learning"} );
+            FC.groups.create( {name: "Advanced Tutoring"} );
+          }
+        }
+      });
 
       FC.main = new MainView({
         el: document.getElementById("main")
