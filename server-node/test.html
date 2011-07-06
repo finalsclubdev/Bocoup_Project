@@ -1,0 +1,22 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <script src="./node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.js"></script>
+    <script>
+    var userSock = io.connect('http://localhost:1337/user');
+
+    userSock.on('connect', function() {
+      userSock.emit('login', prompt('Provide a name.'));
+
+      userSock.on('loggedIn', function() {
+        console.log('logged in');
+      });
+
+      userSock.on('loggedOut', function() {
+        console.log('logged out');
+      });
+    });
+    </script>
+  </head>
+</html>
