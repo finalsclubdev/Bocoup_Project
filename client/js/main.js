@@ -39,7 +39,6 @@
           },
           doc: function(id) {
             var doc = FC.docs.get(id) || FC.docs.create( {title: "Sample Document "+ Math.round(Math.random() * 10000)} );
-            console.log(doc);
             FC.main.transition( new DocView({doc: doc}) );
           }
         }),
@@ -193,13 +192,12 @@
           render: function() {
             var data = this.options.doc.toJSON();
             $(this.el).html(this.template(data));
+            this.editor = ace.edit( $(this.el).find("div.editor")[0] );
+            this.editor.session.on("change", _.bind(this.edit, this) );
             return this;
           },
-          events: {
-            "keyup textarea": "edit"
-          },
           edit: function(e) {
-            this.options.doc.set( {content: $(e.target).val()}) ;
+            this.options.doc.set( {content: this.editor.session.getValue()}) ;
             this.options.doc.save();
           }
         }),
