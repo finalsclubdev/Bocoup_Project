@@ -1,4 +1,5 @@
 var users = {};
+var sessionIDToName = {}; //maps sock.id => name
 
 var validators = {
   isName: function(name) {
@@ -32,6 +33,8 @@ exports.login = function(name, sessionID) {
       sessionID: sessionID
     };
 
+    sessionIDToName[sessionID] = name;
+
     return true;
   }
 };
@@ -44,4 +47,8 @@ exports.logout = function(name, sessionID) {
 
     delete users[name];
   }
+};
+
+exports.disconnect = function(sessionID) {
+  return this.logout(sessionIDToName[sessionID], sessionID);
 };
