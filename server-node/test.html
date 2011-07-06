@@ -16,6 +16,10 @@
       userSock.on('loggedOut', function() {
         console.log('logged out');
       });
+
+      userSock.on('err', function(msg) {
+        console.log('err', msg);
+      });
     });
     </script>
   </head>

@@ -1,18 +1,34 @@
 var http = require('http');
 var io = require('socket.io').listen(1337);
 
+var userDAO = require('./UserDAO.js');
+
 var userRoutes = io.of('/user')
   .on('connection', function(socket) {
 
     socket.on('login', function(name) {
-      socket.set('name', name, function() {
-        socket.emit('loggedIn');
-      });
+      try
+      {
+        if(userDAO.login(name, socket.id)) {
+          socket.emit('loggedIn');
+        }
+      }
+      catch(e)
+      {
+        socket.emit('err', e);
+      }
     });
 
-    socket.on('logout', function() {
-      socket.set('name', null, function() {
-        socket.emit('loggedOut');
-      });
+    socket.on('logout', function(name) {
+      try
+      {
+        if(userDAO.logout(name, socket.id)) {
+          socket.emit('loggedOut');
+        }
+      }
+      catch(e)
+      {
+        socket.emit('err', e);
+      }
     });
   });
