@@ -5,3 +5,11 @@ oooooooooooo  o8o                        oooo             .oooooo.   oooo       
  888    "     888   888   888   .oP"888   888  `"Y88b.  888           888   888   888   888   888 
  888          888   888   888  d8(  888   888  o.  )88b `88b    ooo   888   888   888   888   888 
 o888o        o888o o888o o888o `Y888""8o o888o 8""888P'  `Y8bood8P'  o888o  `V88V"V8P'  `Y8bod8P'
+
+Directories
+-----------
+client/         Client side files (web root).
+
+server-apache/  The static web server configuration files.
+
+server-node/    The application server.
