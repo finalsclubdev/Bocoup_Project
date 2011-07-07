@@ -39,7 +39,6 @@
           },
           doc: function(id) {
             var doc = FC.docs.get(id) || FC.docs.create( {title: "Sample Document "+ Math.round(Math.random() * 10000)} );
-            console.log(doc);
             FC.main.transition( new DocView({doc: doc}) );
           }
         }),
@@ -174,7 +173,7 @@
         }),
 
         GroupView = Backbone.View.extend({
-          initialize: function() {
+          initialize: function(options) {
             _.bindAll(this);
           },
           template: TMPL.group,
@@ -193,14 +192,43 @@
           render: function() {
             var data = this.options.doc.toJSON();
             $(this.el).html(this.template(data));
+            this.editor = ace.edit( $(this.el).find("div.editor")[0] );
+            this.editor.session.on("change", _.bind(this.change, this) );
             return this;
           },
-          events: {
-            "keyup textarea": "edit"
-          },
-          edit: function(e) {
-            this.options.doc.set( {content: $(e.target).val()}) ;
+          change: function(event) {
+            var action = event.data.action,
+                position = this.getEditPosition(event);
+
+            switch (action) {
+            case "insertText":
+              break;
+            case "removeText":
+              break;
+            }
+
+            this.options.doc.set({
+              content: this.editor.session.getValue()
+            });
+
             this.options.doc.save();
+          },
+          getEditPosition: function(event) {
+            var i = 0,
+            pos = 0,
+            start = event.data.range.start.row;
+
+            // Calculate the length of all the rows of text before the edit
+            while(i <= start) {
+              // Make sure that a blank line counts
+              pos = pos + (this.editor.session.doc.$lines[i].length || 1);
+              i++;
+            }
+
+            // Add the column of where the edit was made
+            pos = pos + event.data.range.start.column + 1;
+
+            return pos;
           }
         }),
 
