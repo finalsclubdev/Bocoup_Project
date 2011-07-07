@@ -48,4 +48,19 @@ var groupRoutes = io.of('/group')
         socket.emit('err', e);
       }
     });
+
+    socket.on('get', function(id) {
+      try {
+        var group = groupDAO.get(id);
+
+        if(group) {
+          group.id = id;
+        }
+
+        socket.json.emit('get', group);
+      }
+      catch(e) {
+        socket.emit('err', e);
+      }
+    });
   });
