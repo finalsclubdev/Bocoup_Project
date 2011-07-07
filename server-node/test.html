@@ -6,8 +6,16 @@
     <script src="./colab.js"></script>
     <script>
     colab.addGroupObserver('getList', function(groups) {
-      //drawing code here
-      console.log('observer', groups);
+      console.log('observer got a list of groups', groups);
+
+      //make sure we can retrieve each of the groups individually, by id
+      for(var id in groups) {
+        colab.getGroup(id);
+      }
+    });
+
+    colab.addGroupObserver('get', function(group) {
+      console.log('observer got a group', group);
     });
     </script>
   </head>
