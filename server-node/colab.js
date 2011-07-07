@@ -63,6 +63,10 @@ var colab = (function(io) {
     observers.notify(observers.groupEvents, 'getList', data);
   });
 
+  groupSock.on('get', function(data) {
+    observers.notify(observers.groupEvents, 'get', data);
+  });
+
   //Our API, which we can call internally as well.
   var api = {
     //Add an observer to the group events.
@@ -79,6 +83,11 @@ var colab = (function(io) {
         eventName: eventName,
         callback: callback
       });
+    },
+
+    //Tells the API to get a specific group by its ID.
+    getGroup: function(id) {
+      groupSock.emit('get', id);
     }
   };
 
