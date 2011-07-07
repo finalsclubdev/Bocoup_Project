@@ -2,6 +2,7 @@ var http = require('http');
 var io = require('socket.io').listen(1337);
 
 var userDAO = require('./UserDAO.js');
+var groupDAO = require('./GroupDAO.js');
 
 var userRoutes = io.of('/user')
   .on('connection', function(socket) {
@@ -33,6 +34,18 @@ var userRoutes = io.of('/user')
       }
       catch(e) {
         console.warn('userDAO.disconnect() threw an error, but no one was connected to hear it.', e);
+      }
+    });
+  });
+
+var groupRoutes = io.of('/group')
+  .on('connection', function(socket) {
+    socket.on('getList', function() {
+      try {
+        socket.json.emit('getList', groupDAO.getList());
+      }
+      catch(e) {
+        socket.emit('err', e);
       }
     });
   });
