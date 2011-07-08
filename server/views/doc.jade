@@ -1,0 +1,11 @@
+h1= name
+form(action='/document/#{id}')(method='POST')
+  #document(name='content')= content
+  input(type='hidden')(value='#{_rev}')(name='rev')
+  button(type='submit')(name='method')(value='post') Submit
+  button(type='submit')(name='method')(value='delete') Delete
+a(href='/') Go back home
+script(src='/js/jquery-1.6.2.min.js')
+script(src='/js/jquery.form.js')
+script(src='/js/ace/build/src/ace-uncompressed.js')
+script(src='/js/main.js')

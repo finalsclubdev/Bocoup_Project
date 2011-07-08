@@ -1,3 +1,6 @@
 [submodule "client/js/libs/ace"]
 	path = client/js/libs/ace
 	url = https://github.com/ajaxorg/ace.git
+[submodule "server/public/js/ace"]
+	path = server/public/js/ace
+	url = https://github.com/ajaxorg/ace.git

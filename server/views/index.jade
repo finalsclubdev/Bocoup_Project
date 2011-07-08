@@ -1,0 +1,11 @@
+h1= title
+p Welcome to #{title}
+div#document
+p
+  a(href='/generateDocs') Generate a new document
+ul
+- 
+- each doc in documents
+  li
+    a(href='/document/#{doc.id}') #{doc.id}
+
