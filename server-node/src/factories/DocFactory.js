@@ -1,4 +1,12 @@
 exports.makeDocState = function(doc) {
+  if(typeof doc != 'object') {
+    throw 'You failed to provide a document object.';
+  }
+
+  if(!doc.id || typeof doc.id != 'string') {
+    throw 'That doc object has an invalid id.';
+  }
+  
   return (function(doc) {
     var users = {}; 
     var cursorObservers = [];
