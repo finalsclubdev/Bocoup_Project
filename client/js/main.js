@@ -184,16 +184,56 @@
           }
         }),
 
+        // temporary data for generating messages
+        tmp = {
+          chars: "\n 12345\n67890!\n@#$%^&*()\nabcdef\nghijklmno\npqrstuv\nwxyz",
+          actions: ["write", "remove"]
+        },
+
         DocView = Backbone.View.extend({
+          template: TMPL.doc,
           initialize: function() {
             _.bindAll(this);
           },
-          template: TMPL.doc,
+          events: {
+            "click .toggleMessages": "toggleMessages"
+          },
+          generateMessage: function() {
+            var msg = {
+              act: tmp.actions[ Math.floor(Math.random() * tmp.actions.length) ],
+              from: Math.floor(Math.random() * this.editor.session.getValue().length)
+            };
+
+            switch (msg.act) {
+              case "write":
+                msg.val = tmp.chars.charAt( Math.floor(Math.random() * tmp.chars.length) )["to" + (Math.random() > 0.5 ? "Upper" : "Lower") + "Case"]();
+                break;
+              case "remove":
+                msg.val = 1;
+                break;
+            }
+
+            return msg;
+            
+          },
+          toggleMessages: function(e) {
+            var $t = $(e.target);
+            if (this.msgInterval) {
+              $t.text("Start Messages");
+              this.msgInterval = clearInterval(this.msgInterval);
+            } else {
+              $t.text("Stop Messages");
+              this.msgInterval = setInterval(_.bind(function() {
+                this.trigger("socketmessage", this.generateMessage());
+              },this),250);
+            }
+          },
           render: function() {
             var data = this.options.doc.toJSON();
             $(this.el).html(this.template(data));
             this.editor = ace.edit( $(this.el).find("div.editor")[0] );
             this.editor.session.on("change", _.bind(this.change, this) );
+            this.bind("socketmessage", this.socketmessage);
             return this;
           },
           change: function(event) {
@@ -229,7 +269,22 @@
             pos = pos + event.data.range.start.column + 1;
 
             return pos;
+          },
+          socketmessage: function(msg) {
+            this["on" + msg.act.charAt(0).toUpperCase() + msg.act.substr(1)](msg);
+          },
+          onWrite: function(msg) {
+            var value = this.editor.session.getValue();
+            this.editor.session.setValue( value.substr(0, msg.from) + msg.val + value.substr(msg.from) );
+          },
+          onRemove: function(msg) {
+            var value = this.editor.session.getValue();
+            this.editor.session.setValue(value.substr(0, msg.from - msg.val) + value.substr(msg.from));
+          },
+          onAnnounce: function(msg) {
+            console.log("announce");
           }
+
         }),
 
         FC = window.FC = {
