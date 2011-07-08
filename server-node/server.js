@@ -78,6 +78,17 @@ var docRoutes = io.of('/doc')
             socket.json.emit('cursor', { uid: uid, pos: pos });
           });
         }
+
+        socket.emit('join', data.docID);
+      }
+      catch(e) {
+        socket.emit('err', e);
+      }
+    });
+
+    socket.on('cursor', function(data) {
+      try {
+        docDAO.updateCursor(data.docID, data.uid, data.pos);
       }
       catch(e) {
         socket.emit('err', e);

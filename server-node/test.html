@@ -25,6 +25,19 @@
         colab.joinDoc(group.docs.one.id);
       }
     });
+
+    colab.addDocObserver('cursor', function(data) {
+      console.log('cursor update', data);
+    });
+
+    colab.addDocObserver('join', function(docID) {
+      console.log('just joined docID', docID);
+
+      //FIRE!
+      for(var i = 1; i < 100; i++) {
+        colab.updateCursor(docID, i);
+      }
+    });
     </script>
   </head>
 </html>

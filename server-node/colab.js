@@ -74,6 +74,15 @@ var colab = (function(io) {
     observers.notify(observers.groupEvents, 'get', data);
   });
 
+  //dockSock events.
+  docSock.on('join', function(docID) {
+    observers.notify(observers.docEvents, 'join', docID);
+  });
+
+  docSock.on('cursor', function(data) {
+    observers.notify(observers.docEvents, 'cursor', data);
+  });
+
   //Our API, which we can call internally as well.
   var api = {
     //Add an observer to the group events.
@@ -113,6 +122,11 @@ var colab = (function(io) {
     //Tells the API to part a user from a document.
     partDoc: function(docID) {
       docSock.emit('part', { uid: currUser.id, docID: docID });
+    },
+
+    //Tells the API to update the current user's cursor position.
+    updateCursor: function(docID, pos) {
+      docSock.emit('cursor', { uid: currUser.id, docID: docID, pos: pos });
     }
   };
 

@@ -73,3 +73,20 @@ exports.join = function(uid, docID) {
 
   return (newDocState) ? docStates[docID] : undefined;
 };
+
+/**
+ * Updates the state of the document by passing the user's new cursor position.
+ *
+ * @param {String} docID The document's ID.
+ *
+ * @param {String} uid The user's ID.
+ *
+ * @param {Number} pos The user's cursor's position.
+ */
+exports.updateCursor = function(docID, uid, pos) {
+  if(!docStates[docID]) {
+    throw 'No one has joined that document yet, so why are you sending me cursor positions?';
+  }
+
+  docStates[docID].updateCursor(uid, pos);
+};
