@@ -1,4 +1,4 @@
-var docFactory = require('./DocFactory.js');
+var docFactory = require('../factories/DocFactory.js');
 
 //map of id => doc
 var docs = {

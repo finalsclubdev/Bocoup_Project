@@ -1,9 +1,9 @@
 var http = require('http');
 var io = require('socket.io').listen(1337);
 
-var userDAO = require('./UserDAO.js');
-var groupDAO = require('./GroupDAO.js');
-var docDAO = require('./DocDAO.js');
+var userDAO = require('./src/DAOs/UserDAO.js');
+var groupDAO = require('./src/DAOs/GroupDAO.js');
+var docDAO = require('./src/DAOs/DocDAO.js');
 
 var userRoutes = io.of('/user')
   .on('connection', function(socket) {
