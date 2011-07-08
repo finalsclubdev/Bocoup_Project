@@ -5,6 +5,10 @@
     <script src="./node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.js"></script>
     <script src="./colab.js"></script>
     <script>
+    colab.addUserObserver('loggedIn', function(currUser) {
+      console.log('we are now logged in', currUser);
+    });
+
     colab.addGroupObserver('getList', function(groups) {
       console.log('observer got a list of groups', groups);
 
@@ -16,6 +20,10 @@
 
     colab.addGroupObserver('get', function(group) {
       console.log('observer got a group', group);
+
+      if(group.docs.one) {
+        colab.joinDoc(group.docs.one.id);
+      }
     });
     </script>
   </head>

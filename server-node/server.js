@@ -10,7 +10,7 @@ var userRoutes = io.of('/user')
     socket.on('login', function(name) {
       try {
         if(userDAO.login(name, socket.id)) {
-          socket.emit('loggedIn');
+          socket.emit('loggedIn', name);
         }
       }
       catch(e) {
@@ -60,6 +60,24 @@ var groupRoutes = io.of('/group')
         }
 
         socket.json.emit('get', group);
+      }
+      catch(e) {
+        socket.emit('err', e);
+      }
+    });
+  });
+
+var docRoutes = io.of('/doc')
+  .on('connection', function(socket) {
+    socket.on('join', function(data) {
+      try {
+        var state = docDAO.join(data.uid, data.docID);
+
+        if(state) {
+          state.addCursorObserver(function(uid, pos) {
+            socket.json.emit('cursor', { uid: uid, pos: pos });
+          });
+        }
       }
       catch(e) {
         socket.emit('err', e);

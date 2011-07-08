@@ -27,12 +27,16 @@ var colab = (function(io) {
     console.log('err', msg);
   }
 
+  //Stores the current user's info.
+  var currUser;
+
   //The host we're connecting to (node socket.io server).
   var sockHost = 'http://localhost:1337';
 
   //Our socket groups.
   var userSock = io.connect(sockHost +'/user');
   var groupSock = io.connect(sockHost +'/group');
+  var docSock = io.connect(sockHost +'/doc');
 
   //Bind to the error events with our global handler.
   userSock.on('err', onError);
@@ -41,14 +45,17 @@ var colab = (function(io) {
   //userSock events.
   userSock.on('connect', function() {
     //Once we're connected, ask the user for a name and then send it.
+    //TODO probably don't want to prompt() here
     userSock.emit('login', prompt('Provide a name.'));
   });
 
   //The user has been logged in.
-  userSock.on('loggedIn', function() {
-    console.log('logged in');
+  userSock.on('loggedIn', function(uid) {
+    currUser = {
+      id: uid
+    };
 
-    observers.notify(observers.userEvents, 'loggedIn');
+    observers.notify(observers.userEvents, 'loggedIn', currUser);
   });
 
   //The user has been logged out.
@@ -85,9 +92,27 @@ var colab = (function(io) {
       });
     },
 
+    //Add an observer to the doc events.
+    addDocObserver: function(eventName, callback) {
+      observers.docEvents.push({
+        eventName: eventName,
+        callback: callback
+      });
+    },
+
     //Tells the API to get a specific group by its ID.
     getGroup: function(id) {
       groupSock.emit('get', id);
+    },
+
+    //Tells the API to join a user to a document. 
+    joinDoc: function(docID) {
+      docSock.emit('join', { uid: currUser.id, docID: docID });
+    },
+
+    //Tells the API to part a user from a document.
+    partDoc: function(docID) {
+      docSock.emit('part', { uid: currUser.id, docID: docID });
     }
   };
 
