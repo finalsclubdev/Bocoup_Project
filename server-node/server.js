@@ -3,6 +3,7 @@ var io = require('socket.io').listen(1337);
 
 var userDAO = require('./UserDAO.js');
 var groupDAO = require('./GroupDAO.js');
+var docDAO = require('./DocDAO.js');
 
 var userRoutes = io.of('/user')
   .on('connection', function(socket) {
@@ -55,6 +56,7 @@ var groupRoutes = io.of('/group')
 
         if(group) {
           group.id = id;
+          group.docs = docDAO.getByGID(id);
         }
 
         socket.json.emit('get', group);

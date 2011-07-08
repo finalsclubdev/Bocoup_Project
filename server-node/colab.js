@@ -40,22 +40,22 @@ var colab = (function(io) {
 
   //userSock events.
   userSock.on('connect', function() {
-    //Once we're connected, ask the user for a name and send it.
+    //Once we're connected, ask the user for a name and then send it.
     userSock.emit('login', prompt('Provide a name.'));
+  });
 
-    //The user has been logged in.
-    userSock.on('loggedIn', function() {
-      console.log('logged in');
+  //The user has been logged in.
+  userSock.on('loggedIn', function() {
+    console.log('logged in');
 
-      observers.notify(observers.userEvents, 'loggedIn');
-    });
+    observers.notify(observers.userEvents, 'loggedIn');
+  });
 
-    //The user has been logged out.
-    userSock.on('loggedOut', function() {
-      console.log('logged out');
+  //The user has been logged out.
+  userSock.on('loggedOut', function() {
+    console.log('logged out');
 
-      observers.notify(observers.userEvents, 'loggedOut');
-    });
+    observers.notify(observers.userEvents, 'loggedOut');
   });
 
   //groupSock events.
