@@ -1,22 +1,7 @@
+var validators = require('../validators/UserValidator.js');
+
 var users = {};
 var sessionIDToName = {}; //maps sock.id => name
-
-var validators = {
-  isName: function(name) {
-    if(typeof name != 'string' || name == '') {
-      throw 'That is an invalid name.';
-    }
-
-    return true;
-  },
-  isSessionID: function(sessionID) {
-    if(!sessionID) {
-      throw 'Invalid session ID.';
-    }
-
-    return true;
-  }
-};
 
 exports.login = function(name, sessionID) {
   if(validators.isName(name) && validators.isSessionID(sessionID)) {
