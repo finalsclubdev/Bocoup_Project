@@ -1,4 +1,5 @@
 var docFactory = require('../factories/DocFactory.js');
+var userValidator = require('../validators/UserValidator.js');
 
 //map of id => doc
 var docs = {
@@ -26,6 +27,10 @@ var docStates = {};
  * @returns {Object|null} The document object, or null if it doesn't exist.
  */
 exports.get = function(id) {
+  if(!id || typeof id != 'string') {
+    throw 'Invalid document ID.';
+  }
+
   return (docs[id]) ? docs[id] : null;
 };
 
@@ -37,6 +42,10 @@ exports.get = function(id) {
  * @returns {Object[]} An array of document objects, which include their ID.
  */
 exports.getByGID = function(gid) {
+  if(!gid || typeof gid != 'string') {
+    throw 'Invalid group ID.';
+  }
+
   var res = {};
 
   for(var docID in docs) {
@@ -62,6 +71,14 @@ exports.getByGID = function(gid) {
  * observers.
  */
 exports.join = function(uid, docID) {
+  if(!userValidator.isName(uid)) {
+    throw 'Invalid UID.';
+  }
+
+  if(!docID || typeof docID != 'string') {
+    throw 'Invalid document ID.';
+  }
+
   var newDocState = false;
 
   if(!docStates[docID]) {
@@ -71,7 +88,9 @@ exports.join = function(uid, docID) {
 
   docStates[docID].joinUser(uid);
 
-  return (newDocState) ? docStates[docID] : undefined;
+  if(newDocState) {
+    return docStates[docID];
+  }
 };
 
 /**
