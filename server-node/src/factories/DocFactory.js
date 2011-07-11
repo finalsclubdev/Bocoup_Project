@@ -22,16 +22,38 @@ exports.makeDocState = function(doc) {
     return {
       joinUser: function(uid) {
         if(typeof uid == 'string' && uid) {
+          if(users[uid]) {
+            throw 'That user has already joined.';
+          }
+
           users[uid] = {
             cursorPos: 0
           };
-        }
 
-        fireCursorChange(uid, users[uid].cursorPos);
+          fireCursorChange(uid, users[uid].cursorPos);
+        }
+        else {
+          throw 'That is not a valid UID.';
+        }
       },
 
       addCursorObserver: function(callback) {
+        if(typeof callback != 'function') {
+          throw 'Callbacks must be functions.';
+        }
+
         cursorObservers.push(callback);
+      },
+
+      removeCursorObserver: function(callback) {
+        for(var i in cursorObservers) {
+          if(cursorObservers[i] === callback) {
+            cursorObservers.splice(i, 1);
+            return true;
+          }
+        }
+
+        return false;
       },
 
       updateCursor: function(uid, pos) {
