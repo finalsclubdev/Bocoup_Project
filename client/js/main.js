@@ -63,7 +63,7 @@
 
         User = Backbone.Model.extend({
           defaults: {
-            userid: ""
+            uid: ""
           }
         }),
 
