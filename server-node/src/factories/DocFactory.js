@@ -208,10 +208,6 @@ exports.makeDocState = function(doc) {
         return command;
       },
 
-      bwah: function() {
-        return commandBuffer;
-      },
-
       getDocText: function() {
         var doc = '';
 
