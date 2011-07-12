@@ -223,8 +223,19 @@ exports['OT'] = function(test) {
 
   //add an ! at the end out of seq order
   state.execCommand(docFactory.makeInsertCommand('uid', 4, '!', 3));
-
   test.strictEqual(state.getDocText(), 'bwaah!');
+
+  //delete the first a
+  state.execCommand(docFactory.makeDeleteCommand('uid', 3, 1, 5));
+  test.strictEqual(state.getDocText(), 'bwah!');
+
+  //delete the ! at the end
+  state.execCommand(docFactory.makeDeleteCommand('uid', 5, 1, 6));
+  test.strictEqual(state.getDocText(), 'bwah');
+
+  //insert after where the ! used to be out of seq order
+  state.execCommand(docFactory.makeInsertCommand('otherUser', 6, 'h', 5));
+  test.strictEqual(state.getDocText(), 'bwahh');
 
   /*
    * Join a new user, have them send an update with an old seq #, and make sure
@@ -233,7 +244,7 @@ exports['OT'] = function(test) {
   state.joinUser('lagger');
 
   state.addChangeObserver(function(data) {
-    if(data.command.seq < 6) {
+    if(data.command.seq < 9) {
       test.strictEqual(data.toUser, 'lagger', 'toUser not set properly.');
     }
     else {
@@ -241,6 +252,7 @@ exports['OT'] = function(test) {
     }
   });
 
+  //this triggers both (2) observer callbacks
   state.execCommand(docFactory.makeInsertCommand('lagger', 0, 'l', 0));
 
   test.done();  
