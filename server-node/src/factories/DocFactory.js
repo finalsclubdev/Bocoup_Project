@@ -212,7 +212,18 @@ exports.makeDocState = function(doc) {
         var doc = '';
 
         for(var i in commandBuffer) {
-          doc = doc.substr(0, commandBuffer[i].pos) + commandBuffer[i].val + doc.substr(commandBuffer[i].pos);
+          switch(commandBuffer[i].op) {
+            case OperationEnum['INSERT']:
+              doc = doc.substr(0, commandBuffer[i].pos)
+                      + commandBuffer[i].val
+                      + doc.substr(commandBuffer[i].pos);
+              break;
+
+            case OperationEnum['DELETE']:
+              doc = doc.substr(0, commandBuffer[i].pos - commandBuffer[i].val)
+                      + doc.substr(commandBuffer[i].pos);
+              break;
+          }
         }
 
         return doc;
@@ -235,6 +246,6 @@ exports.makeInsertCommand = function(uid, pos, val, asOf) {
   return makeCommand(uid, pos, val, asOf, OperationEnum['INSERT']);
 };
 
-exports.makeRemoveCommand = function(uid, pos, val, asOf) {
-  return makeCommand(uid, pos, val, asOf, OperationEnum['REMOVE']);
+exports.makeDeleteCommand = function(uid, pos, val, asOf) {
+  return makeCommand(uid, pos, val, asOf, OperationEnum['DELETE']);
 };
