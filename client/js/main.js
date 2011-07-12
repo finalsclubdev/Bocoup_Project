@@ -114,10 +114,7 @@
           },
           submit: function(e) {
             e.preventDefault();
-            FC.users.each(function(u) {
-              u.destroy();
-            });
-            Backbone.history.navigate("", true);
+            colab.logout();
           }
         }),
 
@@ -138,8 +135,8 @@
             FC.users.create(_.extend( $(e.target).serializeObject(), {
                 created: +new Date()
               }), {
-              success: function() {
-                Backbone.history.navigate("", true);
+              success: function(user) {
+                colab.login( user.get("uid") );
               }
             });
           }
@@ -162,12 +159,8 @@
           },
           template: TMPL.groupList,
           render: function() {
-            FC.groups.fetch({
-              success: _.bind(function(collection,groups) {
-                var data = { groups: FC.groups.toJSON() };
-                $(this.el).html(this.template(data));
-              },this)
-            });
+            var data = { groups: FC.groups.toJSON() };
+            $(this.el).html(this.template(data));
             return this;
           }
         }),
@@ -294,20 +287,46 @@
           docs: new DocCollection()
         };
 
+    colab.addUserObserver('connected', function(currUser) {
+      var user = FC.users.at(0);
+
+      if (user) {
+        colab.login( user.get("uid") );
+      } else {
+        Backbone.history.navigate("login", true);
+      }
+
+    });
+
+    colab.addUserObserver('loggedIn', function(user) {
+      colab.getGroups();
+    });
+
+    colab.addUserObserver('loggedOut', function() {
+      // Empty the groups list
+      FC.groups.reset();
+
+      // Destroy local user
+      FC.users.each(function(u) {
+        u.destroy();
+      });
+
+      Backbone.history.navigate("login", true);
+
+    });
+
+    colab.addGroupObserver('getGroups', function(groups) {
+      var arrGroups = _.map(groups, function(v, k) {
+        return _.extend({id: k}, v);
+      });
+      FC.groups.reset(arrGroups);
+      Backbone.history.navigate("groups", true);
+    });
+
     $(function() {
 
       FC.users.fetch();
       FC.docs.fetch();
-      FC.groups.fetch({
-        success: function() {
-          // Temporary test data for development
-          if (!FC.groups.length) {
-            FC.groups.create( {name: "Music Theory 201"} );
-            FC.groups.create( {name: "Ad Hoc Learning"} );
-            FC.groups.create( {name: "Advanced Tutoring"} );
-          }
-        }
-      });
 
       FC.main = new MainView({
         el: document.getElementById("main")
