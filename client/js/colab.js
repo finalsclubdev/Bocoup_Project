@@ -66,8 +66,8 @@ var colab = (function(io) {
   });
 
   //groupSock events.
-  groupSock.on('getList', function(data) {
-    observers.notify(observers.groupEvents, 'getList', data);
+  groupSock.on('getGroups', function(data) {
+    observers.notify(observers.groupEvents, 'getGroups', data);
   });
 
   groupSock.on('get', function(data) {
