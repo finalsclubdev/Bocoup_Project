@@ -44,9 +44,8 @@ var colab = (function(io) {
 
   //userSock events.
   userSock.on('connect', function() {
-    //Once we're connected, ask the user for a name and then send it.
-    //TODO probably don't want to prompt() here
-    userSock.emit('login', prompt('Provide a name.'));
+
+    observers.notify(observers.userEvents, 'connected');
   });
 
   //The user has been logged in.
@@ -66,8 +65,8 @@ var colab = (function(io) {
   });
 
   //groupSock events.
-  groupSock.on('getList', function(data) {
-    observers.notify(observers.groupEvents, 'getList', data);
+  groupSock.on('getGroups', function(data) {
+    observers.notify(observers.groupEvents, 'getGroups', data);
   });
 
   groupSock.on('get', function(data) {
@@ -109,6 +108,21 @@ var colab = (function(io) {
       });
     },
 
+    //Establishes a user as logged in
+    login: function(name) {
+      userSock.emit('login', name);
+    },
+
+    //Destroys a user's session
+    logout: function() {
+      userSock.emit('logout', currUser.id);
+    },
+
+    //Tells the API to get a list of available groups
+    getGroups: function() {
+      groupSock.emit('getGroups');
+    },
+
     //Tells the API to get a specific group by its ID.
     getGroup: function(id) {
       groupSock.emit('get', id);
@@ -130,11 +144,6 @@ var colab = (function(io) {
     }
   };
 
-  //Our internal observers.
-  api.addUserObserver('loggedIn', function() {
-    //Once we've logged in, refresh our list of doc groups.
-    groupSock.emit('getList');
-  });
 
   return api;
 })(io);

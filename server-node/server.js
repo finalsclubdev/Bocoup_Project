@@ -41,9 +41,9 @@ var userRoutes = io.of('/user')
 
 var groupRoutes = io.of('/group')
   .on('connection', function(socket) {
-    socket.on('getList', function() {
+    socket.on('getGroups', function() {
       try {
-        socket.json.emit('getList', groupDAO.getList());
+        socket.json.emit('getGroups', groupDAO.getList());
       }
       catch(e) {
         socket.emit('err', e);
