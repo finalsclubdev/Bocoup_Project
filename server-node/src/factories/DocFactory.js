@@ -65,7 +65,7 @@ exports.makeDocState = function(doc) {
             break;
 
           case OperationEnum['DELETE']:
-            newCmd.pos += prevCmd.val;
+            newCmd.pos -= prevCmd.val;
             break;
 
           default:
