@@ -221,12 +221,20 @@ exports.makeDocState = function(doc) {
   })(doc);
 };
 
-exports.makeInsertCommand = function(uid, pos, val, asOf) {
+function makeCommand(uid, pos, val, asOf, op) {
   return {
-    op: OperationEnum['INSERT'],
+    op: op,
     uid: uid,
     val: val,
     pos: pos,
     asOf: asOf
   };
+};
+
+exports.makeInsertCommand = function(uid, pos, val, asOf) {
+  return makeCommand(uid, pos, val, asOf, OperationEnum['INSERT']);
+};
+
+exports.makeRemoveCommand = function(uid, pos, val, asOf) {
+  return makeCommand(uid, pos, val, asOf, OperationEnum['REMOVE']);
 };
