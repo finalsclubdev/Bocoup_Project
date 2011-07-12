@@ -1,4 +1,5 @@
 var docFactory = require('../../src/factories/DocFactory.js');
+var OperationEnum = require('../../src/enums/OperationEnum.js');
 
 exports["makeDocState() input validation"] = function(test) {
   test.expect(5);
@@ -34,7 +35,7 @@ exports["makeDocState() input validation"] = function(test) {
 };
 
 exports["makeDocState() output's functions"] = function(test) {
-  test.expect(22);
+  test.expect(27);
 
   var state = docFactory.makeDocState({ id: 'bwah' });
 
@@ -63,6 +64,18 @@ exports["makeDocState() output's functions"] = function(test) {
     'updateCursor() does not exist on the state object.'
   );
 
+  test.equal(
+    typeof state.addChangeObserver,
+    'function',
+    'addChangeObserver() does not exist on the state object.'
+  );
+
+  test.equal(
+    typeof state.execCommand,
+    'function',
+    'execCommand() does not exist on the state object.'
+  );
+
   // Make sure functions that require a user fail when provided a non-existing one.
   test.throws(
     function() { state.updateCursor('non-existing user', 32); },
@@ -72,6 +85,11 @@ exports["makeDocState() output's functions"] = function(test) {
   test.throws(
     function() { state.joinUser(123); },
     'Was able to set a user with a non-string UID.'
+  );
+
+  test.throws(
+    function() { state.execCommand(docFactory.makeInsertCommand('uid', 0, 'a', 32)); },
+    'Was able to exec a command from a user that has not joined.'
   );
 
   // Join a user, so everything after this should work with that user.
@@ -145,5 +163,68 @@ exports["makeDocState() output's functions"] = function(test) {
     'A second, non-dupe user was not allowed to join.'
   );
 
+  var validCommand = docFactory.makeInsertCommand('bwah', 0, 'a', 32);
+  
+  test.doesNotThrow(
+    function() { state.execCommand(validCommand); },
+    'Threw up on a valid command op and uid.'
+  );
+
+  var invalidCommand = validCommand;
+  invalidCommand.op = 'asdf';
+
+  test.throws(
+    function() { state.execCommand(invalidCommand); },
+    'Did not throw up on a invalid command op.'
+  );
+
   test.done();
+};
+
+exports['makeInsertCommand()'] = function(test) {
+  test.expect(1);
+
+  test.deepEqual(
+    docFactory.makeInsertCommand('uid', 0, 'a', null),
+    {
+      uid: 'uid',
+      asOf: null,
+      pos: 0,
+      val: 'a',
+      op: OperationEnum['INSERT']
+    },
+    'Invalid insert command returned.'
+  );
+    
+  test.done();
+};
+
+exports['OT'] = function(test) {
+  var state = docFactory.makeDocState({ id: 'someDoc' });
+
+  state.addChangeObserver(function(data) {
+    if(typeof data.command.asOf == 'number') {
+      test.ok(data.command.asOf + 1 === data.command.seq, 'asOf and seq are diff by >1.');
+    }
+  });
+
+  state.joinUser('uid');
+  state.joinUser('otherUser');
+
+  state.execCommand(docFactory.makeInsertCommand('uid', 0, 'b', null));
+  state.execCommand(docFactory.makeInsertCommand('uid', 1, 'w', 0));
+  state.execCommand(docFactory.makeInsertCommand('uid', 2, 'a', 1));
+  state.execCommand(docFactory.makeInsertCommand('uid', 3, 'h', 2));
+
+  //duplicate the 'a' out of seq order
+  state.execCommand(docFactory.makeInsertCommand('otherUser', 2, 'a', 1));
+
+  test.strictEqual(state.getDocText(), 'bwaah');
+
+  //add an ! at the end out of seq order
+  state.execCommand(docFactory.makeInsertCommand('uid', 4, '!', 3));
+
+  test.strictEqual(state.getDocText(), 'bwaah!');
+
+  test.done();  
 };

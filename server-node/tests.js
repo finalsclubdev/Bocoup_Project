@@ -5,5 +5,6 @@ reporter.run([
   './tests/validators/UserValidatorTest.js',
   './tests/DAOs/UserDAOTest.js',
   './tests/DAOs/GroupDAOTest.js',
-  './tests/DAOs/DocDAOTest.js'
+  './tests/DAOs/DocDAOTest.js',
+  './tests/enums/OperationEnumTest.js'
 ]);
