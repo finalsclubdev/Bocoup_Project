@@ -226,5 +226,22 @@ exports['OT'] = function(test) {
 
   test.strictEqual(state.getDocText(), 'bwaah!');
 
+  /*
+   * Join a new user, have them send an update with an old seq #, and make sure
+   * they get a replay. But only check toUser for old seq #'s.
+   */
+  state.joinUser('lagger');
+
+  state.addChangeObserver(function(data) {
+    if(data.command.seq < 6) {
+      test.strictEqual(data.toUser, 'lagger', 'toUser not set properly.');
+    }
+    else {
+      test.strictEqual(data.toUser, undefined, 'toUser set when it should not be.');
+    }
+  });
+
+  state.execCommand(docFactory.makeInsertCommand('lagger', 0, 'l', 0));
+
   test.done();  
 };
