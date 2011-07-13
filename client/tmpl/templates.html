@@ -29,7 +29,7 @@
   Here's the list of groups
   <ul>
   {{#each groups}}
-    <li><a href="#group/{{id}}">{{name}}</a></li>
+    <li><a href="#{{id}}">{{name}}</a></li>
   {{/each}}
   </ul>
 </div>
@@ -38,10 +38,10 @@
   <h2>{{name}}</h2>
   <a href="#" class="back">Back</a>
   <h3>Documents</h3>
-  <li><a href="#document/">Create</a></li>
+  <li><a href="#{{id}}/create">Create</a></li>
   <ul>
   {{#each docs}}
-    <li><a href="#document/{{id}}">{{name}}</a></li>
+    <li><a href="#{{gid}}/{{id}}">{{name}}</a></li>
   {{/each}}
   </ul>
 </div>

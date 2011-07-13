@@ -18,9 +18,8 @@
             "": "home",
             "login": "login",
             "groups": "groupList",
-            "group/:id": "group",
-            "document/:id": "doc"
-
+            ":groupid": "group",
+            ":groupid/:docid": "doc"
           },
           home: function() {
             // If there is no user in localStorage, direct to login
@@ -40,7 +39,7 @@
           },
           group: function(id) {
             // If the groups collection is empty, we have to get the groups collection first
-            // Occurs when navigating directly to #groups/[groupid] without having gone to #groups/ first
+            // Occurs when navigating directly to #[groupid] without having gone to #groups/ first
             // Otherwise, fetch the group immediately
             $.when( FC.groups.length || FC.groups.fetch() ).always( function(groups) {
               var group = FC.groups.get( id );
