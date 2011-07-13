@@ -18,7 +18,9 @@ exports.makeDocState = function(doc) {
     function fireCursorChange(uid, pos) {
       if(typeof uid == 'string' && uid && typeof pos == 'number' && pos >= 0) {
         for(var i in cursorObservers) {
-          cursorObservers[i](doc.id, uid, pos);
+          if(cursorObserver.hasOwnProperty(i)) {
+            cursorObservers[i](doc.id, uid, pos);
+          }
         }
       }
     }
@@ -27,7 +29,7 @@ exports.makeDocState = function(doc) {
       if(typeof command == 'object') {
         var data = {
           docID: doc.id,
-          command: command,
+          command: command
         };
 
         if(toUser && typeof toUser == 'string') {
@@ -35,7 +37,9 @@ exports.makeDocState = function(doc) {
         }
 
         for(var i in changeObservers) {
-          changeObservers[i](data);
+          if(changeObservers.hasOwnProperty(i)) {
+            changeObservers[i](data);
+          }
         }
       }
     }
@@ -61,11 +65,11 @@ exports.makeDocState = function(doc) {
     function resolveCommandPosition(newCmd, prevCmd) {
       if(newCmd.pos > prevCmd.pos) {
         switch(prevCmd.op) {
-          case OperationEnum['INSERT']:
+          case OperationEnum.INSERT:
             newCmd.pos += prevCmd.val.length;
             break;
 
-          case OperationEnum['DELETE']:
+          case OperationEnum.DELETE:
             newCmd.pos -= prevCmd.val;
             break;
 
@@ -213,17 +217,19 @@ exports.makeDocState = function(doc) {
         var doc = '';
 
         for(var i in commandBuffer) {
-          switch(commandBuffer[i].op) {
-            case OperationEnum['INSERT']:
-              doc = doc.substr(0, commandBuffer[i].pos)
-                      + commandBuffer[i].val
-                      + doc.substr(commandBuffer[i].pos);
-              break;
+          if(commandBuffer.hasOwnProperty(i)) {
+            switch(commandBuffer[i].op) {
+              case OperationEnum.INSERT:
+                doc = doc.substr(0, commandBuffer[i].pos) +
+                        commandBuffer[i].val +
+                        doc.substr(commandBuffer[i].pos);
+                break;
 
-            case OperationEnum['DELETE']:
-              doc = doc.substr(0, commandBuffer[i].pos - commandBuffer[i].val)
-                      + doc.substr(commandBuffer[i].pos);
-              break;
+              case OperationEnum.DELETE:
+                doc = doc.substr(0, commandBuffer[i].pos - commandBuffer[i].val) +
+                        doc.substr(commandBuffer[i].pos);
+                break;
+            }
           }
         }
 
@@ -245,12 +251,12 @@ function makeCommand(uid, pos, val, asOf, op) {
     pos: pos,
     asOf: asOf
   };
-};
+}
 
 exports.makeInsertCommand = function(uid, pos, val, asOf) {
-  return makeCommand(uid, pos, val, asOf, OperationEnum['INSERT']);
+  return makeCommand(uid, pos, val, asOf, OperationEnum.INSERT);
 };
 
 exports.makeDeleteCommand = function(uid, pos, val, asOf) {
-  return makeCommand(uid, pos, val, asOf, OperationEnum['DELETE']);
+  return makeCommand(uid, pos, val, asOf, OperationEnum.DELETE);
 };
