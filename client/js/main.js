@@ -404,7 +404,11 @@
 
     colab.addUserObserver('loggedIn', function(user) {
       console.log(FC.users.at(0).get("uid") + " logged in, navigating to original url");
-      Backbone.history.navigate( window.location.hash.substr(1), true );
+      var destHash = window.location.hash.substr(1);
+      // Ensure users are not redirected to login after logging in
+      // if they navigated directly to #login
+      destHash = destHash == "login" ? "groups" : destHash;
+      Backbone.history.navigate( destHash, true );
     });
 
     colab.addUserObserver('loggedOut', function() {
