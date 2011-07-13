@@ -16,6 +16,7 @@
     var Router = Backbone.Router.extend({
           routes: {
             "": "home",
+            "404": "404",
             "login": "login",
             "groups": "groupList",
             ":groupid": "group",
@@ -25,6 +26,9 @@
             // If there is no user in localStorage, direct to login
             // Otherwise, show the available groups
             Backbone.history.navigate( !FC.users.at(0) ? "login" : "groups", true );
+          },
+          404: function() {
+            FC.main.transition( new NotFoundView() );
           },
           login: function() {
             FC.main.transition( new LoginView() );
@@ -44,17 +48,16 @@
             $.when( FC.groups.length || FC.groups.fetch() ).always( function(groups) {
               var group = FC.groups.get( id );
               if ( !group ) {
-                FC.main.transition( new NotFoundView() );
-              } else {
-                group.fetch({
-                  success: function(grp) {
-                    FC.main.transition( new GroupView( {group: grp} ) );
-                  },
-                  error: function(grp) {
-                    console.log( "FAILURE", grp);
-                  }
-                });
+                return Backbone.history.navigate("404", true);
               }
+              group.fetch({
+                success: function(grp) {
+                  FC.main.transition( new GroupView( {group: grp} ) );
+                },
+                error: function(grp) {
+                  console.log( "FAILURE", grp);
+                }
+              });
             });
           },
           doc: function(id) {
@@ -69,7 +72,7 @@
             FC.header = new HeaderView( {el: $(this.el).prev()[0]} );
           },
           events: {
-            "click a.back": "back"
+            "click a.back,a.doubleback": "back"
           },
           transition: function(view) {
             FC.header.render();
@@ -77,7 +80,7 @@
           },
           back: function(e) {
             e.preventDefault();
-            history.go( -1 );
+            history.go( $(e.target).hasClass("doubleback") ? -2 : -1 );
           }
         }),
 
