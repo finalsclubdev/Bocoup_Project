@@ -373,7 +373,7 @@
 
       //FIRE!
       for(var i = 1; i < 100; i++) {
-        colab.updateCursor(docID, i);
+        colab.updateCursor(i);
       }
     });
 
