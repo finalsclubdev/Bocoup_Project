@@ -121,11 +121,11 @@ exports.changeDoc = function(docID, op, uid, pos, val, asOf) {
   var cmd;
 
   switch(op) {
-    case OperationEnum['INSERT']:
+    case OperationEnum.INSERT:
       cmd = docFactory.makeInsertCommand(uid, pos, val, asOf);
       break;
 
-    case OperationEnum['DELETE']:
+    case OperationEnum.DELETE:
       cmd = docFactory.makeDeleteCommand(uid, pos, val, asOf);
       break;
 
@@ -142,4 +142,4 @@ exports.getJoinedUsers = function(docID) {
   }
 
   return docStates[docID].getUsers();
-}
+};
