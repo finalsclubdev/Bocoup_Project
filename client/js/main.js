@@ -352,7 +352,9 @@
 
       //make sure we can retrieve each of the groups individually, by id
       for(var id in groups) {
-        colab.getGroup(id);
+        if(groups.hasOwnProperty(id)) {
+          colab.getGroup(id);
+        }
       }
     });
 
