@@ -38,12 +38,14 @@
 
     colab.addDocObserver('join', function(docID) {
       console.log('just joined docID', docID);
+      colab.updateCursor('one', 3);
+      colab.updateCursor('one', 5);
 
       colab.changeDoc('one', 'INSERT', 0, 'a');
       colab.changeDoc('one', 'INSERT', 1, 'b');
     });
 
-    colab.login('bwah');
+    colab.login(prompt('login'));
     </script>
   </head>
 </html>

@@ -135,3 +135,11 @@ exports.changeDoc = function(docID, op, uid, pos, val, asOf) {
 
   docStates[docID].execCommand(cmd);
 };
+
+exports.getJoinedUsers = function(docID) {
+  if(!docStates[docID]) {
+    throw 'No one has joined that document yet, so why are you sending me cursor positions?';
+  }
+
+  return docStates[docID].getUsers();
+}

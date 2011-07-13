@@ -18,7 +18,7 @@ exports.makeDocState = function(doc) {
     function fireCursorChange(uid, pos) {
       if(typeof uid == 'string' && uid && typeof pos == 'number' && pos >= 0) {
         for(var i in cursorObservers) {
-          cursorObservers[i](uid, pos);
+          cursorObservers[i](doc.id, uid, pos);
         }
       }
     }
@@ -26,6 +26,7 @@ exports.makeDocState = function(doc) {
     function fireDocChange(command, toUser) {
       if(typeof command == 'object') {
         var data = {
+          docID: doc.id,
           command: command,
         };
 
@@ -227,6 +228,10 @@ exports.makeDocState = function(doc) {
         }
 
         return doc;
+      },
+
+      getUsers: function() {
+        return users;
       }
     };
   })(doc);

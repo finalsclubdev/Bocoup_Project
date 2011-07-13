@@ -74,12 +74,27 @@ var docRoutes = io.of('/doc')
         var state = docDAO.join(data.uid, data.docID);
 
         if(state) {
-          state.addCursorObserver(function(uid, pos) {
-            socket.json.emit('cursor', { uid: uid, pos: pos });
+          state.addCursorObserver(function(docID, uid, pos) {
+            var users = docDAO.getJoinedUsers(docID);
+
+            for(var i in users) {
+              if(i !== uid) {
+                socket.namespace.sockets[userDAO.get(i).sessionID].emit('cursor', { uid: uid, pos: pos });
+              }
+            }
           });
 
           state.addChangeObserver(function(data) {
-            ((data.toUser) ? socket.broadcast : socket.json).emit('change', data.command);
+            if(data.toUser) {
+              socket.namespace.sockets[userDAO.get(data.toUser).sessionID].emit('change', data.command);
+            }
+            else {
+              var users = docDAO.getJoinedUsers(data.docID);
+
+              for(var i in users) {
+                socket.namespace.sockets[userDAO.get(i).sessionID].emit('change', data.command);
+              }
+            }
           });
         }
 

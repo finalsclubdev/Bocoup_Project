@@ -35,7 +35,7 @@ exports["makeDocState() input validation"] = function(test) {
 };
 
 exports["makeDocState() output's functions"] = function(test) {
-  test.expect(27);
+  test.expect(30);
 
   var state = docFactory.makeDocState({ id: 'bwah' });
 
@@ -93,7 +93,8 @@ exports["makeDocState() output's functions"] = function(test) {
   );
 
   // Join a user, so everything after this should work with that user.
-  var onInitialCursorUpdate = function(uid, pos) {
+  var onInitialCursorUpdate = function(docID, uid, pos) {
+    test.equal(docID, 'bwah', 'Incorrect docID.');
     test.equal(uid, 'bwah', 'Incorrect UID reported.');
     test.equal(pos, 0, 'Incorrect initial cursor position reported.');
   };
@@ -113,12 +114,19 @@ exports["makeDocState() output's functions"] = function(test) {
     'Incorrectly threw up on a valid user ID.'
   );
 
+  test.deepEqual(
+    state.getUsers(),
+    { 'bwah': { cursorPos: 0 } },
+    'Users object was not initialized properly.'
+  );
+
   test.ok(
     state.removeCursorObserver(onInitialCursorUpdate),
     'Was not able to remove the onInitialCursorUpdate() observer.'
   );
 
-  var onCursorUpdate = function(uid, pos) {
+  var onCursorUpdate = function(docID, uid, pos) {
+    test.equal(docID, 'bwah', 'Incorrect docID reported.');
     test.equal(uid, 'bwah', 'Incorrect UID reported.');
     test.equal(pos, 32, 'Incorrect cursor position reported.');
   };

@@ -55,3 +55,7 @@ exports.disconnect = function(sessionID) {
     this.logout(sessionIDToName[sessionID], sessionID) :
     false;
 };
+
+exports.get = function(uid) {
+  return users[uid];
+};
