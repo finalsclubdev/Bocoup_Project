@@ -41,16 +41,16 @@
   <li><a href="#document/">Create</a></li>
   <ul>
   {{#each docs}}
-    <li><a href="#document/{{id}}">{{title}}</a></li>
+    <li><a href="#document/{{id}}">{{name}}</a></li>
   {{/each}}
   </ul>
 </div>
 
 <div class="template" id="doc">
   <form>
-    <h2>{{title}}</h2>
+    <h2>{{name}}</h2>
     <a href="#">Done</a>
-    <div class="editor">{{content}}</div>
+    <div class="editor">{{text}}</div>
     <button class="toggleMessages" type="button">Start Messages</button>
   </form>
 </div>

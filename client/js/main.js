@@ -39,11 +39,27 @@
             });
           },
           group: function(id) {
-            var group = FC.groups.get(id);
-            FC.main.transition( group ? new GroupView({group: group}) : new NotFoundView() );
+            // If the groups collection is empty, we have to get the groups collection first
+            // Occurs when navigating directly to #groups/[groupid] without having gone to #groups/ first
+            // Otherwise, fetch the group immediately
+            $.when( FC.groups.length || FC.groups.fetch() ).always( function(groups) {
+              var group = FC.groups.get( id );
+              if ( !group ) {
+                FC.main.transition( new NotFoundView() );
+              } else {
+                group.fetch({
+                  success: function(grp) {
+                    FC.main.transition( new GroupView( {group: grp} ) );
+                  },
+                  error: function(grp) {
+                    console.log( "FAILURE", grp);
+                  }
+                });
+              }
+            });
           },
           doc: function(id) {
-            var doc = FC.docs.get(id) || FC.docs.create( {title: "Sample Document "+ Math.round(Math.random() * 10000)} );
+            var doc = FC.docs.get(id) || FC.docs.create( {name: "Sample Document "+ Math.round(Math.random() * 10000)} );
             FC.main.transition( new DocView({doc: doc}) );
           }
         }),
@@ -79,7 +95,40 @@
 
         Group = Backbone.Model.extend({
           defaults: {
-            name: ""
+            name: "",
+            docs: []
+          },
+          initialize: function() {
+            _.bindAll(this);
+            console.log("group initialized", this);
+            this.docs = new DocCollection( this.get("docs") );
+          },
+          change: function(e) {
+            console.log("group change event", e);
+          },
+          sync: function(method, group, options) {
+            var dfd = jQuery.Deferred().always(function(resp) {
+              options.success.call(group, resp);
+            });
+
+            function onRead( grp ) {
+              dfd.resolve( grp );
+            }
+
+            switch( method ) {
+              case "read":
+                colab.addGroupObserver('get', onRead);
+                colab.getGroup( group.id );
+                break;
+              case "create":
+                break;
+              case "update":
+                break;
+              case "delete":
+                break;
+            }
+
+            return dfd;
           }
         }),
 
@@ -92,8 +141,14 @@
             });
 
             function onRead( groups ) {
+              // Transform the nested object of groups into an 
+              // array of groups with an array of documents
               var arrGroups = _.map(groups, function(v, k) {
-                return _.extend({id: k}, v);
+                var attrs = _.extend({id: k}, v);
+                attrs.docs = _.map(attrs.docs, function(doc, d) {
+                  return doc;
+                });
+                return attrs;
               });
               dfd.resolve( arrGroups );
             }
@@ -110,19 +165,21 @@
               case "delete":
                 break;
             }
+
+            return dfd;
+
           }
         }),
 
         Doc = Backbone.Model.extend({
           defaults: {
-            title: "",
-            content: ""
+            name: "",
+            text: ""
           }
         }),
 
         DocCollection = Backbone.Collection.extend({
-          model: Doc,
-          localStorage: new Backbone.Store("Docs")
+          model: Doc
         }),
 
         HeaderView = Backbone.View.extend({
@@ -201,7 +258,11 @@
           },
           template: TMPL.group,
           render: function() {
-            var data = _.extend( this.options.group.toJSON(), {docs: FC.docs.toJSON()} );
+            var data = _.extend( 
+              this.options.group.toJSON(),
+              {docs: this.options.group.docs.toJSON()}
+            );
+            console.log(data);
             $(this.el).html(this.template(data));
             return this;
           }
@@ -271,7 +332,7 @@
             }
 
             this.options.doc.set({
-              content: this.editor.session.getValue()
+              text: this.editor.session.getValue()
             });
 
             this.options.doc.save();
@@ -313,8 +374,7 @@
         FC = window.FC = {
           router: new Router(),
           users: new UserCollection(),
-          groups: new GroupCollection(),
-          docs: new DocCollection()
+          groups: new GroupCollection()
         };
 
     colab.addUserObserver('connected', function(currUser) {
@@ -329,8 +389,8 @@
     });
 
     colab.addUserObserver('loggedIn', function(user) {
-      console.log(FC.users.at(0).get("uid") + " logged in, navigating to groups");
-      Backbone.history.navigate("groups", true);
+      console.log(FC.users.at(0).get("uid") + " logged in, navigating to original url");
+      Backbone.history.navigate( window.location.hash.substr(1), true );
     });
 
     colab.addUserObserver('loggedOut', function() {
@@ -344,26 +404,6 @@
 
       Backbone.history.navigate("login", true);
 
-    });
-
-
-    colab.addGroupObserver('get', function(groups) {
-      console.log('observer got a list of groups', groups);
-
-      //make sure we can retrieve each of the groups individually, by id
-      for(var id in groups) {
-        if(groups.hasOwnProperty(id)) {
-          colab.getGroup(id);
-        }
-      }
-    });
-
-    colab.addGroupObserver('get', function(group) {
-      console.log('observer got a group', group);
-
-      if(group.docs.one) {
-        colab.joinDoc(group.docs.one.id);
-      }
     });
 
     colab.addDocObserver('cursor', function(data) {
@@ -382,7 +422,6 @@
     $(function() {
 
       FC.users.fetch();
-      FC.docs.fetch();
 
       FC.main = new MainView({
         el: document.getElementById("main")
