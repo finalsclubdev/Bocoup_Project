@@ -7,6 +7,8 @@
     <script>
     colab.addUserObserver('loggedIn', function(currUser) {
       console.log('we are now logged in', currUser);
+
+      colab.joinDoc('one');
     });
 
     colab.addGroupObserver('getList', function(groups) {
@@ -30,14 +32,18 @@
       console.log('cursor update', data);
     });
 
+    colab.addDocObserver('change', function(data) {
+      console.log('change', data);
+    });
+
     colab.addDocObserver('join', function(docID) {
       console.log('just joined docID', docID);
 
-      //FIRE!
-      for(var i = 1; i < 100; i++) {
-        colab.updateCursor(docID, i);
-      }
+      colab.changeDoc('one', 'INSERT', 0, 'a');
+      colab.changeDoc('one', 'INSERT', 1, 'b');
     });
+
+    colab.login('bwah');
     </script>
   </head>
 </html>

@@ -77,6 +77,10 @@ var docRoutes = io.of('/doc')
           state.addCursorObserver(function(uid, pos) {
             socket.json.emit('cursor', { uid: uid, pos: pos });
           });
+
+          state.addChangeObserver(function(data) {
+            ((data.toUser) ? socket.broadcast : socket.json).emit('change', data.command);
+          });
         }
 
         socket.emit('join', data.docID);
@@ -89,6 +93,15 @@ var docRoutes = io.of('/doc')
     socket.on('cursor', function(data) {
       try {
         docDAO.updateCursor(data.docID, data.uid, data.pos);
+      }
+      catch(e) {
+        socket.emit('err', e);
+      }
+    });
+
+    socket.on('change', function(data) {
+      try {
+        docDAO.changeDoc(data.docID, data.op, data.uid, data.pos, data.val, data.asOf);
       }
       catch(e) {
         socket.emit('err', e);

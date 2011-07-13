@@ -22,6 +22,8 @@ var colab = (function(io) {
     }
   };
 
+  var lastSeenSeq = null;
+
   //A socket wide function for handling errors.
   function onError(msg) {
     console.log('err', msg);
@@ -80,6 +82,10 @@ var colab = (function(io) {
 
   docSock.on('cursor', function(data) {
     observers.notify(observers.docEvents, 'cursor', data);
+  });
+
+  docSock.on('change', function(data) {
+    console.log(data);
   });
 
   //Our API, which we can call internally as well.
@@ -141,6 +147,32 @@ var colab = (function(io) {
     //Tells the API to update the current user's cursor position.
     updateCursor: function(docID, pos) {
       docSock.emit('cursor', { uid: currUser.id, docID: docID, pos: pos });
+    },
+
+    /**
+     * Tells the API to change the document's state.
+     *
+     * @param {String} docID The document's ID.
+     *
+     * @param {String} op The operation being done: 'INSERT' or 'DELETE'.
+     *
+     * @param {Number} pos The string position that the operation is being
+     * done. If you are deleting the first character, then the pos would be 1
+     * (the index AFTER the character you're deleting. This is because you are
+     * performing the operation AT a position, not ON a position.
+     *
+     * @param {mixed} val A string for 'INSERT' or an integer for 'DELETE'
+     * (number of characters to be deleted).
+     */
+    changeDoc: function(docID, op, pos, val) {
+      docSock.emit('change', {
+        docID: docID,
+        op: op,
+        uid: currUser.id,
+        pos: pos,
+        val: val,
+        asOf: lastSeenSeq
+      });
     }
   };
 

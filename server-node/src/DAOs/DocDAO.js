@@ -1,15 +1,18 @@
 var docFactory = require('../factories/DocFactory.js');
 var userValidator = require('../validators/UserValidator.js');
+var OperationEnum = require('../enums/OperationEnum.js');
 
 //map of id => doc
 var docs = {
   'one': {
+    id: 'one',
     name: 'One Document',
     gid: 'grpID-A',
     seq: 23,
     text: 'Hello there, how are you today?'
   },
   'two': {
+    id: 'two',
     name: 'Another Document',
     gid: 'grpID-A',
     seq: 100,
@@ -31,7 +34,7 @@ exports.get = function(id) {
     throw 'Invalid document ID.';
   }
 
-  return (docs[id]) ? docs[id] : null;
+  return docs[id] || null;
 };
 
 /**
@@ -108,4 +111,27 @@ exports.updateCursor = function(docID, uid, pos) {
   }
 
   docStates[docID].updateCursor(uid, pos);
+};
+
+exports.changeDoc = function(docID, op, uid, pos, val, asOf) {
+  if(!docStates[docID]) {
+    throw 'No one has joined that document yet, so why are you sending me cursor positions?';
+  }
+
+  var cmd;
+
+  switch(op) {
+    case OperationEnum['INSERT']:
+      cmd = docFactory.makeInsertCommand(uid, pos, val, asOf);
+      break;
+
+    case OperationEnum['DELETE']:
+      cmd = docFactory.makeDeleteCommand(uid, pos, val, asOf);
+      break;
+
+    default:
+      throw 'Unsupported document operation: '+ op +'.';
+  }
+
+  docStates[docID].execCommand(cmd);
 };
