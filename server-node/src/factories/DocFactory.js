@@ -249,4 +249,3 @@ exports.makeInsertCommand = function(uid, pos, val, asOf) {
 exports.makeDeleteCommand = function(uid, pos, val, asOf) {
   return makeCommand(uid, pos, val, asOf, OperationEnum['DELETE']);
 };
-
