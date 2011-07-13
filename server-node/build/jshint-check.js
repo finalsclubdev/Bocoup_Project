@@ -2,7 +2,17 @@ var JSHINT = require("./lib/jshint/jshint.js").JSHINT,
   print = require("sys").print,
   src = require("fs").readFileSync(process.argv[2], "utf8");
 
-JSHINT(src, { evil: true, forin: true, maxerr: 100 });
+JSHINT(
+  src,
+  {
+    evil: true,
+    forin: true,
+    maxerr: 100,
+    noempty: true,
+    nomen: true,
+    node: true
+  }
+);
 
 var ok = {
 
