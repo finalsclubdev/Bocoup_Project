@@ -60,9 +60,21 @@
               });
             });
           },
-          doc: function(id) {
-            var doc = FC.docs.get(id) || FC.docs.create( {name: "Sample Document "+ Math.round(Math.random() * 10000)} );
-            FC.main.transition( new DocView({doc: doc}) );
+          doc: function(groupid, docid) {
+            // In the same vein as the above case, the groups collection
+            // must be populated in case the document was navigated to directly
+            $.when( FC.groups.length || FC.groups.fetch() ).always( function(groups) {
+              var doc, group = FC.groups.get( groupid );
+              if ( !group ) {
+                return Backbone.history.navigate("404", true);
+              } 
+              doc = group.docs.get(docid);
+              // There is currently no document creation view, so we'll 404 for now
+              if ( !doc ) {
+                return Backbone.history.navigate("404", true);
+              }
+              FC.main.transition( new DocView({doc: doc}) );
+            });
           }
         }),
 
