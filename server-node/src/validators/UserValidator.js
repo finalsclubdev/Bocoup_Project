@@ -1,5 +1,5 @@
 exports.isName = function(name) {
-  if(typeof name != 'string' || name == '') {
+  if(typeof name != 'string' || name === '') {
     throw 'That is an invalid name.';
   }
 
@@ -7,7 +7,7 @@ exports.isName = function(name) {
 };
 
 exports.isSessionID = function(sessionID) {
-  if(!sessionID || typeof sessionID != 'string' || sessionID == '') {
+  if(!sessionID || typeof sessionID != 'string' || sessionID === '') {
     throw 'Invalid session ID.';
   }
 
