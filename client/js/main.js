@@ -31,7 +31,12 @@
             FC.main.transition( new LoginView() );
           },
           groupList: function(e) {
-            FC.main.transition( new GroupListView() );
+            console.log("fetching groups");
+            FC.groups.fetch({
+              success: function(collection, resp) {
+                FC.main.transition( new GroupListView() );
+              }
+            });
           },
           group: function(id) {
             var group = FC.groups.get(id);
@@ -80,7 +85,32 @@
 
         GroupCollection = Backbone.Collection.extend({
           model: Group,
-          localStorage: new Backbone.Store("Groups")
+          sync: function(method, collection, options) {
+
+            var dfd = jQuery.Deferred().always(function(resp) {
+              options.success.call(collection, resp);
+            });
+
+            function onRead( groups ) {
+              var arrGroups = _.map(groups, function(v, k) {
+                return _.extend({id: k}, v);
+              });
+              dfd.resolve( arrGroups );
+            }
+
+            switch( method ) {
+              case "read":
+                colab.addGroupObserver('getGroups', onRead);
+                colab.getGroups();
+                break;
+              case "create":
+                break;
+              case "update":
+                break;
+              case "delete":
+                break;
+            }
+          }
         }),
 
         Doc = Backbone.Model.extend({
@@ -299,7 +329,8 @@
     });
 
     colab.addUserObserver('loggedIn', function(user) {
-      colab.getGroups();
+      console.log(FC.users.at(0).get("uid") + " logged in, navigating to groups");
+      Backbone.history.navigate("groups", true);
     });
 
     colab.addUserObserver('loggedOut', function() {
@@ -315,12 +346,35 @@
 
     });
 
-    colab.addGroupObserver('getGroups', function(groups) {
-      var arrGroups = _.map(groups, function(v, k) {
-        return _.extend({id: k}, v);
-      });
-      FC.groups.reset(arrGroups);
-      Backbone.history.navigate("groups", true);
+
+    colab.addGroupObserver('get', function(groups) {
+      console.log('observer got a list of groups', groups);
+
+      //make sure we can retrieve each of the groups individually, by id
+      for(var id in groups) {
+        colab.getGroup(id);
+      }
+    });
+
+    colab.addGroupObserver('get', function(group) {
+      console.log('observer got a group', group);
+
+      if(group.docs.one) {
+        colab.joinDoc(group.docs.one.id);
+      }
+    });
+
+    colab.addDocObserver('cursor', function(data) {
+      console.log('cursor update', data);
+    });
+
+    colab.addDocObserver('join', function(docID) {
+      console.log('just joined docID', docID);
+
+      //FIRE!
+      for(var i = 1; i < 100; i++) {
+        colab.updateCursor(docID, i);
+      }
     });
 
     $(function() {

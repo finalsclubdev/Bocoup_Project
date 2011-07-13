@@ -94,7 +94,7 @@
         store = model.collection.localStorage || model.collection.sessionStorage;
       }
       if (!store) {
-        return error("No storage found");
+        return options.error("No storage found");
       }
 
       switch (method) {
