@@ -92,7 +92,9 @@ var docRoutes = io.of('/doc')
               var users = docDAO.getJoinedUsers(data.docID);
 
               for(var i in users) {
-                socket.namespace.sockets[userDAO.get(i).sessionID].emit('change', data.command);
+                if(users.hasOwnProperty(i)) {
+                  socket.namespace.sockets[userDAO.get(i).sessionID].emit('change', data.command);
+                }
               }
             }
           });
