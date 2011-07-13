@@ -1,3 +1,5 @@
+NODE := `which node nodejs`
+
 GIT := git
 MAKE := make
 DIST_FILE := webapp.tar.gz

@@ -1,4 +1,4 @@
-NODE := node
+NODE := `which node nodejs`
 
 JUNIT_RUNNER := ./tests.js
 
