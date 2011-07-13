@@ -13,4 +13,8 @@ check:
 	${NODE} ${JUNIT_RUNNER}
 
 hint:
-	for file in `find ${SERVER_FILE} ${SRC_DIR} -name "*.js"`; do ${NODE} ${JSHINT_CHECK} $$file; done
+	@@for file in `find ${SERVER_FILE} ${SRC_DIR} -name "*.js"`; do \
+		echo "Hinting: $$file"; \
+		${NODE} ${JSHINT_CHECK} $$file; \
+		echo "--------------------------"; \
+	done
