@@ -189,6 +189,13 @@
           defaults: {
             name: "",
             text: ""
+          },
+          join: function() {
+            colab.addDocObserver("join", function(doc) { 
+              console.log("JOINED", doc);
+            });
+            console.log("about to join", this.id);
+            colab.joinDoc(this.id);
           }
         }),
 
@@ -290,8 +297,14 @@
 
         DocView = Backbone.View.extend({
           template: TMPL.doc,
-          initialize: function() {
+          initialize: function(options) {
             _.bindAll(this);
+            this.doc = options.doc;
+            this.doc.join();
+            colab.addDocObserver('cursor', function(data) {
+              console.log('cursor update', data);
+            });
+
           },
           events: {
             "click .toggleMessages": "toggleMessages"
@@ -312,7 +325,7 @@
             }
 
             return msg;
-            
+
           },
           toggleMessages: function(e) {
             var $t = $(e.target);
@@ -428,14 +441,7 @@
       console.log('cursor update', data);
     });
 
-    colab.addDocObserver('join', function(docID) {
-      console.log('just joined docID', docID);
 
-      //FIRE!
-      for(var i = 1; i < 100; i++) {
-        colab.updateCursor(i);
-      }
-    });
 
     $(function() {
 
