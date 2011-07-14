@@ -467,7 +467,13 @@
 
             colab.addUserObserver('loggedIn', function(user) {
               // Once the user is logged in, we can proceed with showing the app
-              window.location.hash = "groups";
+              // Ensure users are not redirected to login after logging in
+              // if they navigated directly to #login
+
+              var destHash = window.location.hash.substr(1);
+              destHash = destHash == "login" ? "groups" : destHash;
+              window.location.hash = destHash;
+
               console.log(FC.users.at(0).get("uid") + " logged in");
               FC.connected.resolve({msg: "Connected", user: FC.users.at(0)});
             });
