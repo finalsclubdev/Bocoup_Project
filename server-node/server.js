@@ -1,5 +1,5 @@
 var http = require('http');
-var io = require('socket.io').listen(1337);
+var io = require('socket.io').listen(1337, 'dev.finalsclub.org');
 
 var userDAO = require('./src/DAOs/UserDAO.js');
 var groupDAO = require('./src/DAOs/GroupDAO.js');

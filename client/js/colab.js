@@ -34,7 +34,7 @@ var colab = (function(io) {
   var currDoc = {};
 
   //The host we're connecting to (node socket.io server).
-  var sockHost = 'http://localhost:1337';
+  var sockHost = 'http://dev.finalsclub.org:1337';
 
   //Our socket groups.
   var userSock = io.connect(sockHost +'/user');
