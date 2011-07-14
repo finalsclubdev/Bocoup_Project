@@ -13,7 +13,7 @@ exports['instantiation'] = function(test) {
 };
 
 exports['get()'] = function(test) {
-  test.expect(10);
+  test.expect(9);
 
   test.equal(
     typeof docDAO.get,
@@ -48,12 +48,6 @@ exports['get()'] = function(test) {
     typeof doc,
     'object',
     'Got a non-object document.'
-  );
-
-  test.equal(
-    typeof doc.name,
-    'string',
-    'Got a non-string document name.'
   );
 
   test.equal(

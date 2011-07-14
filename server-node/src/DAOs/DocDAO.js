@@ -6,14 +6,12 @@ var OperationEnum = require('../enums/OperationEnum.js');
 var docs = {
   'one': {
     id: 'one',
-    name: 'One Document',
     gid: 'grpID-A',
     seq: 23,
     text: 'Hello there, how are you today?'
   },
   'two': {
     id: 'two',
-    name: 'Another Document',
     gid: 'grpID-A',
     seq: 100,
     text: 'This is another document.'
