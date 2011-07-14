@@ -119,6 +119,7 @@
 
             function onRead( grp ) {
               dfd.resolve( grp );
+              colab.removeGroupObserver( onRead );
             }
 
             switch( method ) {
@@ -157,6 +158,7 @@
                 return attrs;
               });
               dfd.resolve( arrGroups );
+              colab.removeGroupObserver( onRead );
             }
 
             switch( method ) {
