@@ -42,39 +42,30 @@
             });
           },
           group: function(id) {
-            // If the groups collection is empty, we have to get the groups collection first
-            // Occurs when navigating directly to #[groupid] without having gone to #groups/ first
-            // Otherwise, fetch the group immediately
-            $.when( FC.groups.length || FC.groups.fetch() ).always( function(groups) {
-              var group = FC.groups.get( id );
-              if ( !group ) {
-                return Backbone.history.navigate("404", true);
+            var group = FC.groups.get( id );
+            if ( !group ) {
+              return Backbone.history.navigate("404", true);
+            }
+            group.fetch({
+              success: function(grp) {
+                FC.main.transition( new GroupView( {group: grp} ) );
+              },
+              error: function(grp) {
+                console.log( "FAILURE", grp);
               }
-              group.fetch({
-                success: function(grp) {
-                  FC.main.transition( new GroupView( {group: grp} ) );
-                },
-                error: function(grp) {
-                  console.log( "FAILURE", grp);
-                }
-              });
             });
           },
           doc: function(groupid, docid) {
-            // In the same vein as the above case, the groups collection
-            // must be populated in case the document was navigated to directly
-            $.when( FC.groups.length || FC.groups.fetch() ).always( function(groups) {
-              var doc, group = FC.groups.get( groupid );
-              if ( !group ) {
-                return Backbone.history.navigate("404", true);
-              } 
-              doc = group.docs.get(docid);
-              // There is currently no document creation view, so we'll 404 for now
-              if ( !doc ) {
-                return Backbone.history.navigate("404", true);
-              }
-              FC.main.transition( new DocView({doc: doc}) );
-            });
+            var doc, group = FC.groups.get( groupid );
+            if ( !group ) {
+              return Backbone.history.navigate("404", true);
+            } 
+            doc = group.docs.get(docid);
+            // There is currently no document creation view, so we'll 404 for now
+            if ( !doc ) {
+              return Backbone.history.navigate("404", true);
+            }
+            FC.main.transition( new DocView({doc: doc}) );
           }
         }),
 
@@ -114,11 +105,12 @@
           },
           initialize: function() {
             _.bindAll(this);
-            console.log("group initialized", this);
             this.docs = new DocCollection( this.get("docs") );
           },
           change: function(e) {
-            console.log("group change event", e);
+            this.docs.reset( _.map(this.get("docs"), function(doc, d) {
+              return doc;
+            }));
           },
           sync: function(method, group, options) {
             var dfd = jQuery.Deferred().always(function(resp) {
@@ -257,6 +249,14 @@
           template: TMPL.notFound,
           render: function() {
             $(this.el).html(this.template());
+            return this;
+          }
+        }),
+
+        UnavailableView = NotFoundView.extend({
+          template: TMPL.unavailable,
+          render: function() {
+            $(this.el).html(this.template(this.options));
             return this;
           }
         }),
@@ -401,58 +401,88 @@
         FC = window.FC = {
           router: new Router(),
           users: new UserCollection(),
-          groups: new GroupCollection()
+          groups: new GroupCollection(),
+          // A Deferred we'll use to check for socket connectivity,
+          // in order to defer hash history tracking until after the
+          // socket is connected and a user stored in localStorage is logged in, 
+          // as well as after Group data has been bootstrapped.
+          connected: jQuery.Deferred(),
+          init: function() {
+
+            // When the document is ready, insert the main view
+            $(function() {
+
+              FC.main = new MainView({
+                el: document.getElementById("main")
+              });
+
+            });
+
+            // Load user from localStorage
+            FC.users.fetch();
+
+            // Wait for the connection to be established or unavailable
+            // before setting up the remaining handlers or redirecting to #unavailable,
+            // and finally starting hash history tracking
+            $.when( FC.connected )
+            .then( FC.onSocketConnect )
+            .fail( FC.onSocketFail )
+            .always( function() {
+              // Because a loaded list of groups is a prerequesite for loading any document view
+              // we'll attempt to grab the groups before starting hash tracking
+              $.when( FC.groups.length || FC.groups.fetch() )
+              .always( function(groups) {
+                Backbone.history.start();
+              });
+            });
+
+            // Wait 2.5 seconds before considering the socket unavailable
+            // and re-routing to an offline state 
+            setTimeout(function() {
+              FC.connected.reject({msg: "Socket connection timed out!"});
+            },2500);
+
+            // Set up observers for socket connection and login
+            colab.addUserObserver('connected', function(currUser) {
+              var user = FC.users.at(0);
+              if (!user) {
+                // If there is no user in localStorage,
+                // prepare to send the user to login
+                window.location.hash = "login";
+                FC.connected.resolve({msg: "Connected, but not logged in"});
+              } else {
+                // If a user exists, we still need to wait for login before
+                // resolving the connection deferred
+                colab.login( user.get("uid") );
+              }
+            });
+
+            colab.addUserObserver('loggedIn', function(user) {
+              // Once the user is logged in, we can proceed with showing the app
+              window.location.hash = "groups";
+              console.log(FC.users.at(0).get("uid") + " logged in");
+              FC.connected.resolve({msg: "Connected", user: FC.users.at(0)});
+            });
+
+          },
+          onSocketFail: function( excp ) {
+            FC.main.transition( new UnavailableView( excp ) );
+            window.location.hash = "unavailable";
+          },
+          onSocketConnect: function( resp ) {
+
+            colab.addUserObserver('loggedOut', function() {
+              // Destroy local user
+              FC.users.each(function(u) {
+                u.destroy();
+              });
+              Backbone.history.navigate("login", true);
+            });
+
+          }
         };
 
-    colab.addUserObserver('connected', function(currUser) {
-      var user = FC.users.at(0);
-
-      if (user) {
-        colab.login( user.get("uid") );
-      } else {
-        Backbone.history.navigate("login", true);
-      }
-
-    });
-
-    colab.addUserObserver('loggedIn', function(user) {
-      console.log(FC.users.at(0).get("uid") + " logged in, navigating to original url");
-      var destHash = window.location.hash.substr(1);
-      // Ensure users are not redirected to login after logging in
-      // if they navigated directly to #login
-      destHash = destHash == "login" ? "groups" : destHash;
-      Backbone.history.navigate( destHash, true );
-    });
-
-    colab.addUserObserver('loggedOut', function() {
-      // Empty the groups list
-      FC.groups.reset();
-
-      // Destroy local user
-      FC.users.each(function(u) {
-        u.destroy();
-      });
-
-      Backbone.history.navigate("login", true);
-
-    });
-
-    colab.addDocObserver('cursor', function(data) {
-      console.log('cursor update', data);
-    });
-
-
-
-    $(function() {
-
-      FC.users.fetch();
-
-      FC.main = new MainView({
-        el: document.getElementById("main")
-      });
-
-      Backbone.history.start();
-    });
+        FC.init();
 
   });
 
