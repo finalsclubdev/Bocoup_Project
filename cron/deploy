@@ -3,12 +3,12 @@
 
 REPO_ROOT="$1"
 
-GIT='git'
+GIT=`which git`
 GIT_REMOTE='origin'
 GIT_BRANCH='master'
 
-SERVER_START='./server-node/start.sh'
-SERVER_STOP='./server-node/stop.sh'
+SERVER_START='./start.sh'
+SERVER_STOP='./stop.sh'
 
 # Sanity checks.
 [ $EUID -ne 0 ] && echo 'Must run as root.' && exit 1
@@ -19,11 +19,13 @@ SERVER_STOP='./server-node/stop.sh'
 cd $REPO_ROOT
 
 # Pull the latest from git.
-$GIT pull $GIT_REMOTE $GIT_BRANCH > /dev/null || echo 'Could not pull latest code' && exit 1
+$GIT pull $GIT_REMOTE $GIT_BRANCH > /dev/null
 
 # Restart the services.
-./server-node/stop.sh > /dev/null
-./server-node/start.sh > /dev/null || echo 'Could not start the server.' && exit 1
+cd ./server-node
+$SERVER_STOP || echo 'Nothing to stop.'
+$SERVER_START || echo 'Could not start the server.'
 
 # Update the "current commit" file.
-$GIT rev-parse HEAD > ./client/status.html
+cd ../client
+$GIT rev-parse HEAD > ./status.html

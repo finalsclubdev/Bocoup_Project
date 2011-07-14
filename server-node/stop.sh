@@ -1,2 +1,2 @@
 #!/bin/sh
-sudo forever stop ./server.js
+sudo forever stopall
