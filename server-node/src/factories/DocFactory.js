@@ -18,7 +18,7 @@ exports.makeDocState = function(doc) {
     function fireCursorChange(uid, pos) {
       if(typeof uid == 'string' && uid && typeof pos == 'number' && pos >= 0) {
         for(var i in cursorObservers) {
-          if(cursorObserver.hasOwnProperty(i)) {
+          if(cursorObservers.hasOwnProperty(i)) {
             cursorObservers[i](doc.id, uid, pos);
           }
         }
