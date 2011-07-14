@@ -2,3 +2,4 @@
 *.swp
 server-node/npm-debug.log
 webapp.tar.gz
+client/status.html

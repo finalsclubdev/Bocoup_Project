@@ -1,0 +1,29 @@
+#!/bin/bash
+# Grabs the latest app code and restarts the server.
+
+REPO_ROOT="$1"
+
+GIT='git'
+GIT_REMOTE='origin'
+GIT_BRANCH='master'
+
+SERVER_START='./server-node/start.sh'
+SERVER_STOP='./server-node/stop.sh'
+
+# Sanity checks.
+[ $EUID -ne 0 ] && echo 'Must run as root.' && exit 1
+
+[ ! -d "$REPO_ROOT" ] && echo 'Invalid server root directory.' && exit 1
+
+# Go to the project root.
+cd $REPO_ROOT
+
+# Pull the latest from git.
+$GIT pull $GIT_REMOTE $GIT_BRANCH > /dev/null || echo 'Could not pull latest code' && exit 1
+
+# Restart the services.
+./server-node/stop.sh > /dev/null
+./server-node/start.sh > /dev/null || echo 'Could not start the server.' && exit 1
+
+# Update the "current commit" file.
+$GIT rev-parse HEAD > ./client/status.html
