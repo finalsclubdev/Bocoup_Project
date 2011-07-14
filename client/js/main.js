@@ -206,6 +206,8 @@
             var user = FC.users.at( 0 ),
                 data = user ? user.toJSON() : {};
 
+            data.connected = FC.connected.isResolved();
+
             $(this.el).html( this.template( data ) );
             return this;
           },

@@ -1,9 +1,11 @@
 <div class="template" id="header">
   <h1>FinalsClub</h1>
+  {{#if connected}}
   {{#if uid}}
   <form method="POST" action="logout">
     <button type="submit">Log Out {{uid}}</button>
   </form>
+  {{/if}}
   {{/if}}
 </div>
 
