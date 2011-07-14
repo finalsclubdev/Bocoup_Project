@@ -13,6 +13,10 @@
       TMPL[el.id] = Handlebars.compile($.trim(el.innerHTML));
     });
 
+    Handlebars.registerHelper("documentName", function(doc) {
+      return doc.name || doc.text.substring(0,20) + "...";
+    });
+
     var Router = Backbone.Router.extend({
           routes: {
             "": "home",
