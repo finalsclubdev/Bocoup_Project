@@ -244,6 +244,15 @@ var colab = (function(io) {
         val: val,
         asOf: currDoc.lastSeenSeq || null
       });
+    },
+
+    /**
+     * Adds a group.
+     *
+     * @param {String} name The name of the group. This is not unique.
+     */
+    addGroup: function(name) {
+      groupSock.emit('add', name);
     }
   };
 

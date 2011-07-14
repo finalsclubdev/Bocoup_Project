@@ -75,6 +75,15 @@ var groupRoutes = io.of('/group')
         socket.emit('err', e);
       }
     });
+
+    socket.on('add', function(name) {
+      try {
+        groupDAO.add(name);
+      }
+      catch(e) {
+        socket.emit('err', e);
+      }
+    });
   });
 
 var docRoutes = io.of('/doc')
