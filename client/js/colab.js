@@ -22,13 +22,11 @@ var colab = (function(io) {
     },
 
     remove: function(observers, fn) {
-console.log('before', observers);
       for(var i in observers) {
         if(observers.hasOwnProperty(i) && observers[i].callback === fn) {
           observers.splice(i, 1);
         }
       }
-console.log('after', observers);
     }
   };
 
