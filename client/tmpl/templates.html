@@ -12,7 +12,7 @@
   <p>The resource you requested could not be found</p>
   <p>
   <a href="#">Home</a>
-  <a href="#" class="back">Back</a>
+  <a href="#" class="doubleback">Back</a>
   </p>
 </div>
 
@@ -29,7 +29,7 @@
   Here's the list of groups
   <ul>
   {{#each groups}}
-    <li><a href="#group/{{id}}">{{name}}</a></li>
+    <li><a href="#{{id}}">{{name}}</a></li>
   {{/each}}
   </ul>
 </div>
@@ -38,19 +38,19 @@
   <h2>{{name}}</h2>
   <a href="#" class="back">Back</a>
   <h3>Documents</h3>
-  <li><a href="#document/">Create</a></li>
+  <li><a href="#{{id}}/create">Create</a></li>
   <ul>
   {{#each docs}}
-    <li><a href="#document/{{id}}">{{title}}</a></li>
+    <li><a href="#{{gid}}/{{id}}">{{name}}</a></li>
   {{/each}}
   </ul>
 </div>
 
 <div class="template" id="doc">
   <form>
-    <h2>{{title}}</h2>
+    <h2>{{name}}</h2>
     <a href="#">Done</a>
-    <div class="editor">{{content}}</div>
+    <div class="editor">{{text}}</div>
     <button class="toggleMessages" type="button">Start Messages</button>
   </form>
 </div>

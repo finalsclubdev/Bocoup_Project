@@ -16,16 +16,19 @@
     var Router = Backbone.Router.extend({
           routes: {
             "": "home",
+            "404": "404",
             "login": "login",
             "groups": "groupList",
-            "group/:id": "group",
-            "document/:id": "doc"
-
+            ":groupid": "group",
+            ":groupid/:docid": "doc"
           },
           home: function() {
             // If there is no user in localStorage, direct to login
             // Otherwise, show the available groups
             Backbone.history.navigate( !FC.users.at(0) ? "login" : "groups", true );
+          },
+          404: function() {
+            FC.main.transition( new NotFoundView() );
           },
           login: function() {
             FC.main.transition( new LoginView() );
@@ -39,12 +42,39 @@
             });
           },
           group: function(id) {
-            var group = FC.groups.get(id);
-            FC.main.transition( group ? new GroupView({group: group}) : new NotFoundView() );
+            // If the groups collection is empty, we have to get the groups collection first
+            // Occurs when navigating directly to #[groupid] without having gone to #groups/ first
+            // Otherwise, fetch the group immediately
+            $.when( FC.groups.length || FC.groups.fetch() ).always( function(groups) {
+              var group = FC.groups.get( id );
+              if ( !group ) {
+                return Backbone.history.navigate("404", true);
+              }
+              group.fetch({
+                success: function(grp) {
+                  FC.main.transition( new GroupView( {group: grp} ) );
+                },
+                error: function(grp) {
+                  console.log( "FAILURE", grp);
+                }
+              });
+            });
           },
-          doc: function(id) {
-            var doc = FC.docs.get(id) || FC.docs.create( {title: "Sample Document "+ Math.round(Math.random() * 10000)} );
-            FC.main.transition( new DocView({doc: doc}) );
+          doc: function(groupid, docid) {
+            // In the same vein as the above case, the groups collection
+            // must be populated in case the document was navigated to directly
+            $.when( FC.groups.length || FC.groups.fetch() ).always( function(groups) {
+              var doc, group = FC.groups.get( groupid );
+              if ( !group ) {
+                return Backbone.history.navigate("404", true);
+              } 
+              doc = group.docs.get(docid);
+              // There is currently no document creation view, so we'll 404 for now
+              if ( !doc ) {
+                return Backbone.history.navigate("404", true);
+              }
+              FC.main.transition( new DocView({doc: doc}) );
+            });
           }
         }),
 
@@ -54,7 +84,7 @@
             FC.header = new HeaderView( {el: $(this.el).prev()[0]} );
           },
           events: {
-            "click a.back": "back"
+            "click a.back,a.doubleback": "back"
           },
           transition: function(view) {
             FC.header.render();
@@ -62,7 +92,7 @@
           },
           back: function(e) {
             e.preventDefault();
-            history.go( -1 );
+            history.go( $(e.target).hasClass("doubleback") ? -2 : -1 );
           }
         }),
 
@@ -79,7 +109,40 @@
 
         Group = Backbone.Model.extend({
           defaults: {
-            name: ""
+            name: "",
+            docs: []
+          },
+          initialize: function() {
+            _.bindAll(this);
+            console.log("group initialized", this);
+            this.docs = new DocCollection( this.get("docs") );
+          },
+          change: function(e) {
+            console.log("group change event", e);
+          },
+          sync: function(method, group, options) {
+            var dfd = jQuery.Deferred().always(function(resp) {
+              options.success.call(group, resp);
+            });
+
+            function onRead( grp ) {
+              dfd.resolve( grp );
+            }
+
+            switch( method ) {
+              case "read":
+                colab.addGroupObserver('get', onRead);
+                colab.getGroup( group.id );
+                break;
+              case "create":
+                break;
+              case "update":
+                break;
+              case "delete":
+                break;
+            }
+
+            return dfd;
           }
         }),
 
@@ -92,8 +155,14 @@
             });
 
             function onRead( groups ) {
+              // Transform the nested object of groups into an 
+              // array of groups with an array of documents
               var arrGroups = _.map(groups, function(v, k) {
-                return _.extend({id: k}, v);
+                var attrs = _.extend({id: k}, v);
+                attrs.docs = _.map(attrs.docs, function(doc, d) {
+                  return doc;
+                });
+                return attrs;
               });
               dfd.resolve( arrGroups );
             }
@@ -110,19 +179,21 @@
               case "delete":
                 break;
             }
+
+            return dfd;
+
           }
         }),
 
         Doc = Backbone.Model.extend({
           defaults: {
-            title: "",
-            content: ""
+            name: "",
+            text: ""
           }
         }),
 
         DocCollection = Backbone.Collection.extend({
-          model: Doc,
-          localStorage: new Backbone.Store("Docs")
+          model: Doc
         }),
 
         HeaderView = Backbone.View.extend({
@@ -201,7 +272,11 @@
           },
           template: TMPL.group,
           render: function() {
-            var data = _.extend( this.options.group.toJSON(), {docs: FC.docs.toJSON()} );
+            var data = _.extend( 
+              this.options.group.toJSON(),
+              {docs: this.options.group.docs.toJSON()}
+            );
+            console.log(data);
             $(this.el).html(this.template(data));
             return this;
           }
@@ -271,7 +346,7 @@
             }
 
             this.options.doc.set({
-              content: this.editor.session.getValue()
+              text: this.editor.session.getValue()
             });
 
             this.options.doc.save();
@@ -313,8 +388,7 @@
         FC = window.FC = {
           router: new Router(),
           users: new UserCollection(),
-          groups: new GroupCollection(),
-          docs: new DocCollection()
+          groups: new GroupCollection()
         };
 
     colab.addUserObserver('connected', function(currUser) {
@@ -329,8 +403,12 @@
     });
 
     colab.addUserObserver('loggedIn', function(user) {
-      console.log(FC.users.at(0).get("uid") + " logged in, navigating to groups");
-      Backbone.history.navigate("groups", true);
+      console.log(FC.users.at(0).get("uid") + " logged in, navigating to original url");
+      var destHash = window.location.hash.substr(1);
+      // Ensure users are not redirected to login after logging in
+      // if they navigated directly to #login
+      destHash = destHash == "login" ? "groups" : destHash;
+      Backbone.history.navigate( destHash, true );
     });
 
     colab.addUserObserver('loggedOut', function() {
@@ -344,26 +422,6 @@
 
       Backbone.history.navigate("login", true);
 
-    });
-
-
-    colab.addGroupObserver('get', function(groups) {
-      console.log('observer got a list of groups', groups);
-
-      //make sure we can retrieve each of the groups individually, by id
-      for(var id in groups) {
-        if(groups.hasOwnProperty(id)) {
-          colab.getGroup(id);
-        }
-      }
-    });
-
-    colab.addGroupObserver('get', function(group) {
-      console.log('observer got a group', group);
-
-      if(group.docs.one) {
-        colab.joinDoc(group.docs.one.id);
-      }
     });
 
     colab.addDocObserver('cursor', function(data) {
@@ -382,7 +440,6 @@
     $(function() {
 
       FC.users.fetch();
-      FC.docs.fetch();
 
       FC.main = new MainView({
         el: document.getElementById("main")
