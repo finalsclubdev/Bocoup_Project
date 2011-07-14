@@ -11,8 +11,6 @@ SERVER_START='./start.sh'
 SERVER_STOP='./stop.sh'
 
 # Sanity checks.
-[ $EUID -ne 0 ] && echo 'Must run as root.' && exit 1
-
 [ ! -d "$REPO_ROOT" ] && echo 'Invalid server root directory.' && exit 1
 
 # Go to the project root.
