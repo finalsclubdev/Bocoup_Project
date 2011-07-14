@@ -1,6 +1,8 @@
+var OperationEnum = require('../enums/OperationEnum.js');
 var docFactory = require('../factories/DocFactory.js');
 var userValidator = require('../validators/UserValidator.js');
-var OperationEnum = require('../enums/OperationEnum.js');
+var docValidator = require('../validators/DocValidator.js');
+var groupValidator = require('../validators/GroupValidator.js');
 
 //map of id => doc
 var docs = {
@@ -23,6 +25,38 @@ var docStates = {};
 
 //map of uid => docid
 var users = {};
+
+/**
+ * Creates a new document in a group with a provided ID and returns it.
+ *
+ * @param {String} id The document's ID. Must be unique.
+ *
+ * @param {String} gid The group's ID. The group must exist.
+ *
+ * @returns The new document.
+ */
+exports.add = function(id, gid) {
+  if(!docValidator.isValidID(id)) {
+    throw 'That is not a valid document ID.';
+  }
+
+  if(!groupValidator.isValidID(gid)) {
+    throw 'That is not a valid group ID.';
+  }
+
+  if(docs[id] && docs[id].gid === gid) {
+    throw 'A document with that slug already exists in that group.';
+  }
+
+  docs[id] = {
+    id: id,
+    gid: gid,
+    seq: null,
+    text: ''
+  };
+
+  return docs[id];
+};
 
 /**
  * Returns a document by its ID.

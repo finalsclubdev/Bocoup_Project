@@ -267,3 +267,51 @@ exports['changeDoc()'] = function(test) {
 
   test.done();
 };
+
+exports['add()'] = function(test) {
+  test.equal(
+    typeof docDAO.add,
+    'function',
+    'add() is not a function.'
+  );
+
+  test.throws(
+    function() { docDAO.add('no spaces allowed', 'valid'); },
+    'Allowed an ID with spaces.'
+  );
+
+  test.throws(
+    function() { docDAO.add(123, 'valid'); },
+    'Allowed a non-string ID.'
+  );
+
+  test.throws(
+    function() { docDAO.add('valid', 1234); },
+    'Allowed a non-string gid.'
+  );
+
+  test.throws(
+    function() { docDAO.add('valid', 'no spaces allowed'); },
+    'Allowed a GID with spaces.'
+  );
+
+  var newDoc;
+
+  test.doesNotThrow(
+    function() { newDoc = docDAO.add('123456', '654321'); },
+    'Threw up on valid input.'
+  );
+
+  test.deepEqual(
+    newDoc,
+    {
+      id: '123456',
+      gid: '654321',
+      seq: null,
+      text: ''
+    },
+    'The created document was not what we were expecting.'
+  );
+
+  test.done();
+};
