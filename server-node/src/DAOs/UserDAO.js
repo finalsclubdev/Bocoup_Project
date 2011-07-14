@@ -14,6 +14,7 @@ exports.login = function(name, sessionID) {
     }
 
     users[name] = {
+      id: name,
       joinedAt: new Date().getTime(),
       sessionID: sessionID
     };
@@ -43,7 +44,9 @@ exports.logout = function(name, sessionID) {
       throw 'You cannot log other users out.';
     }
 
+    delete sessionIDToName[sessionID];
     delete users[name];
+
     return true;
   }
 
@@ -58,4 +61,8 @@ exports.disconnect = function(sessionID) {
 
 exports.get = function(uid) {
   return users[uid];
+};
+
+exports.getBySessionID = function(sid) {
+  return users[sessionIDToName[sid]] || null;
 };

@@ -114,7 +114,7 @@ exports['getByGID()'] = function(test) {
 };
 
 exports['join()'] = function(test) {
-  test.expect(7);
+  test.expect(8);
 
   test.equal(typeof docDAO.join, 'function', 'join() is not a funciton.');
 
@@ -148,6 +148,11 @@ exports['join()'] = function(test) {
     'Got a defined value when joining the second user.'
   );
 
+  test.throws(
+    function() { docDAO.join('hi', 'non-existing doc'); },
+    'Did not throw when the document does not exist.'
+  );
+
   test.done();
 };
 
@@ -170,6 +175,100 @@ exports['updateCursor()'] = function(test) {
   test.doesNotThrow(
     function() { docDAO.updateCursor('one', 'uid', 3); },
     'Did not allow us to update a doc that does have a state and that we joined.'
+  );
+
+  test.done();
+};
+
+exports['getJoinedUsers()'] = function(test) {
+
+  test.expect(6);
+
+  test.throws(
+    function() { docDAO.getJoinedUsers('two'); },
+    'Did not throw up when no one has joined the doc yet.'
+  );
+
+  var users;
+
+  test.doesNotThrow(
+    function() { users = docDAO.getJoinedUsers('one'); },
+    'Threw up on a valid, existing doc ID.'
+  );
+
+  test.equal(
+    typeof users,
+    'object',
+    'Did not return the proper type.'
+  );
+
+  for(var i in users) {
+    if(users.hasOwnProperty(i)) {
+      test.equal(typeof users[i].cursorPos, 'number', 'Invalid cursor position.');
+    }
+  }
+
+  test.done();
+};
+
+exports['getUserJoinedDoc()'] = function(test) {
+  test.expect(6);
+
+  test.equal(
+    typeof docDAO.getUserJoinedDoc,
+    'function',
+    'getUserJoinedDoc() is not a function.'
+  );
+
+  test.throws(
+    function() { docDAO.getUserJoinedDoc(123); },
+    'Did not throw up on invalid uid.'
+  );
+
+  test.strictEqual(
+    docDAO.getUserJoinedDoc('bwahuser'),
+    null,
+    'Did not return null when the user has not joined any docs yet.'
+  );
+
+  test.doesNotThrow(
+    function() { docDAO.join('bwahuser', 'one'); },
+    'Threw up on joining the doc.'
+  );
+
+  var doc;
+
+  test.doesNotThrow(
+    function() { doc = docDAO.getUserJoinedDoc('bwahuser'); },
+    'Threw up on a valid uid.'
+  );
+
+  test.strictEqual(
+    doc.id,
+    'one',
+    'Did not return the proper docID.'
+  );
+
+  test.done();
+};
+
+exports['changeDoc()'] = function(test) {
+  test.expect(3);
+
+  test.equal(
+    typeof docDAO.changeDoc,
+    'function',
+    'changeDoc() is not a function.'
+  );
+
+  test.throws(
+    function() { docDAO.changeDoc('not existing', 'INSERT', 'bwah', 0, 'a'); },
+    'Did not throw on an doc that does not have anyone joined.'
+  );
+
+  test.throws(
+    function() { docDAO.changeDoc('one', 'invalid op', 'bwah', 0, 'a'); },
+    'Did not throw up on an invalid operation.'
   );
 
   test.done();

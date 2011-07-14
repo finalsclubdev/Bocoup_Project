@@ -20,7 +20,11 @@ var docs = {
   }
 };
 
+//map of docid => uid
 var docStates = {};
+
+//map of uid => docid
+var users = {};
 
 /**
  * Returns a document by its ID.
@@ -86,14 +90,38 @@ exports.join = function(uid, docID) {
 
   if(!docStates[docID]) {
     newDocState = true;
-    docStates[docID] = docFactory.makeDocState(exports.get(docID));
+
+    var doc = this.get(docID);
+
+    if(!doc) {
+      throw 'That document does not exist yet.';
+    }
+
+    docStates[docID] = docFactory.makeDocState(doc);
   }
 
+  users[uid] = docID;
   docStates[docID].joinUser(uid);
 
   if(newDocState) {
     return docStates[docID];
   }
+};
+
+exports.part = function(uid, docID) {
+  if(!userValidator.isName(uid)) {
+    throw 'Invalid UID.';
+  }
+
+  if(!docID || typeof docID != 'string') {
+    throw 'Invalid document ID.';
+  }
+
+  if(!docStates[docID]) {
+    throw 'No one has joined that document, so why are you trying to part with it?';
+  }
+
+  docStates[docID].partUser(uid);
 };
 
 /**
@@ -142,4 +170,27 @@ exports.getJoinedUsers = function(docID) {
   }
 
   return docStates[docID].getUsers();
+};
+
+/**
+ * Returns the document ID that the user has joined to, null if they aren't on
+ * any documents.
+ *
+ * @param {String} uid The user's ID.
+ *
+ * @returns {String|null} The document's ID, or null if they are not currently
+ * joined to a document.
+ */
+exports.getUserJoinedDoc = function(uid) {
+  if(typeof uid !== 'string') {
+    throw 'Invalid user id.';
+  }
+
+  var docID = users[uid];
+
+  if(!docID) {
+    return null;
+  }
+
+  return docs[docID] || null;
 };

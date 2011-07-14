@@ -31,10 +31,20 @@ var userRoutes = io.of('/user')
 
     socket.on('disconnect', function() {
       try {
-        userDAO.disconnect(socket.id);
+        var user = userDAO.getBySessionID(socket.id);
+
+        if(user.id) {
+          var doc = docDAO.getUserJoinedDoc(user.id);
+
+          if(doc) {
+            docDAO.part(user.id, doc.id);
+          }
+
+          userDAO.disconnect(socket.id);
+        }
       }
       catch(e) {
-        console.warn('userDAO.disconnect() threw an error, but no one was connected to hear it.', e);
+        console.warn('userDAO.disconnect() threw an error, but no one was connected to hear it.', e.message);
       }
     });
   });

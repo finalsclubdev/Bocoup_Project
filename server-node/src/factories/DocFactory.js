@@ -116,6 +116,21 @@ exports.makeDocState = function(doc) {
         }
       },
 
+      partUser: function(uid) {
+        if(typeof uid === 'string' && uid) {
+          if(!users[uid]) {
+            throw 'That user is not on this document.';
+          }
+
+          delete users[uid];
+
+          //TODO inform the other clients
+        }
+        else {
+          throw 'That is not a valid UID.';
+        }
+      },
+
       addCursorObserver: function(callback) {
         if(typeof callback != 'function') {
           throw 'Callbacks must be functions.';
