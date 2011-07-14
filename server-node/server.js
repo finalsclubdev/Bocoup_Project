@@ -78,8 +78,23 @@ var docRoutes = io.of('/doc')
             var users = docDAO.getJoinedUsers(docID);
 
             for(var i in users) {
-              if(i !== uid) {
-                socket.namespace.sockets[userDAO.get(i).sessionID].emit('cursor', { uid: uid, pos: pos });
+              if(users.hasOwnProperty(i) && i !== uid) {
+                var user = userDAO.get(i);
+
+                if(user) {
+                  var sid = user.sessionID;
+
+                  if(socket.namespace.sockets[sid]) {
+                    socket.namespace.sockets[sid].emit('cursor', { uid: uid, pos: pos });
+                  }
+                  else {
+                    console.log('No socket found for sessionID "'+sid+'"');
+                  }
+                }
+                else {
+                  //TODO do something about it.
+                  console.warn('There is a disconnected user still joined to a document.');
+                }
               }
             }
           });
