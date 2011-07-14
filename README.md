@@ -13,14 +13,14 @@
 ## Developing Locally
 * Modify your `/etc/HOSTS` file, rerouting dev.finalsclub.org to your development environment
 
-    127.0.0.1 dev.finalsclub.org
+        127.0.0.1 dev.finalsclub.org
 
 * Run an HTTP server of your choice in the `client` directory
 
-    python -m SimpleHTTPServer 1234
+        python -m SimpleHTTPServer 1234
 
 * Run the socket.io server from the `server-node` directory
 
-    node server.js
+        node server.js
 
 * Open `http://dev.finalsclub.org` in a browser
