@@ -117,6 +117,11 @@ var colab = (function(io) {
     }
   });
 
+  docSock.on('add', function(newDoc) {
+    console.log(newDoc);
+    observers.notify(observers.docEvents, 'add', newDoc);
+  });
+
   //Our API, which we can call internally as well.
   var api = {
     //Add an observer to the group events.
@@ -253,6 +258,18 @@ var colab = (function(io) {
      */
     addGroup: function(name) {
       groupSock.emit('add', name);
+    },
+
+    /**
+     * Adds a new document in a group with a given ID. IDs must be strings, >=
+     * 6 chars long.
+     *
+     * @param {String} id The document's ID.
+     *
+     * @param {String} gid The group's ID that this document is joining.
+     */
+    addDocument: function(id, gid) {
+      docSock.emit('add', { id: id, gid: gid });
     }
   };
 

@@ -158,4 +158,13 @@ var docRoutes = io.of('/doc')
         socket.emit('err', e);
       }
     });
+
+    socket.on('add', function(data) {
+      try {
+        socket.emit('add', docDAO.add(data.id, data.gid));
+      }
+      catch(e) {
+        socket.emit('err', e);
+      }
+    });
   });
