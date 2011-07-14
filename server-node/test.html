@@ -8,10 +8,12 @@
     colab.addUserObserver('loggedIn', function(currUser) {
       console.log('we are now logged in', currUser);
 
+      colab.getGroups();
+
       colab.joinDoc('one');
     });
 
-    colab.addGroupObserver('getList', function(groups) {
+    colab.addGroupObserver('getGroups', function(groups) {
       console.log('observer got a list of groups', groups);
 
       //make sure we can retrieve each of the groups individually, by id
@@ -31,6 +33,12 @@
     colab.addDocObserver('cursor', function(data) {
       console.log('cursor update', data);
     });
+
+    var bwah = function (data) {
+      console.log('bwah');
+    }
+
+    colab.addGroupObserver('getGroups', bwah);
 
     colab.addDocObserver('change', function(data) {
       console.log('change', data);

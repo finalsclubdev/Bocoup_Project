@@ -19,6 +19,16 @@ var colab = (function(io) {
           observers[i].callback(data);
         }
       }
+    },
+
+    remove: function(observers, fn) {
+console.log('before', observers);
+      for(var i in observers) {
+        if(observers.hasOwnProperty(i) && observers[i].callback === fn) {
+          observers.splice(i, 1);
+        }
+      }
+console.log('after', observers);
     }
   };
 
@@ -119,6 +129,15 @@ var colab = (function(io) {
       });
     },
 
+    //The inverse of addGroupObserver()
+    removeGroupObserver: function(fn) {
+      if(typeof fn !== 'function') {
+        throw 'That is not a function.';
+      }
+
+      observers.remove(observers.groupEvents, fn);
+    },
+
     //Add an observer to the user events.
     addUserObserver: function(eventName, callback) {
       observers.userEvents.push({
@@ -127,12 +146,30 @@ var colab = (function(io) {
       });
     },
 
+    //The inverse of addUserObserver()
+    removeUserObserver: function(fn) {
+      if(typeof fn !== 'function') {
+        throw 'That is not a function.';
+      }
+
+      observers.remove(observers.userEvents, fn);
+    },
+
     //Add an observer to the doc events.
     addDocObserver: function(eventName, callback) {
       observers.docEvents.push({
         eventName: eventName,
         callback: callback
       });
+    },
+
+    //The inverse of removeDocObserver()
+    removeDocObserver: function(fn) {
+      if(typeof fn !== 'function') {
+        throw 'That is not a function.';
+      }
+
+      observers.remove(observers.docEvents, fn);
     },
 
     //Establishes a user as logged in
