@@ -7,6 +7,16 @@ var testGroups = {
   }
 };
 
+function generateID() {
+  var buff = '';
+
+  for(var i = 0; i < 6; i++) {
+    buff += String.fromCharCode(Math.floor(Math.random() * 116));
+  }
+
+  return buff;
+}
+
 /**
  * Gets a map of all the groups by their id.
  *
@@ -28,4 +38,17 @@ exports.get = function(gid) {
   }
 
   return (testGroups[gid]) ? testGroups[gid] : false;
+};
+
+/**
+ * Creates a new group.
+ *
+ * @param {String} name The name of the group for display.
+ */
+exports.add = function(name) {
+  if(!name || typeof name != 'string') {
+    throw 'Invalid group name.';
+  }
+
+  testGroups[generateID()] = { name: name };
 };
