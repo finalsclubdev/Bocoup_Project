@@ -11,7 +11,7 @@ function generateID() {
   var buff = '';
 
   for(var i = 0; i < 6; i++) {
-    buff += String.fromCharCode(Math.floor(Math.random() * 116));
+    buff += Math.floor(Math.random() * 10);
   }
 
   return buff;
