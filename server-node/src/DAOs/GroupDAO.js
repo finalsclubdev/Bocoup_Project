@@ -50,5 +50,9 @@ exports.add = function(name) {
     throw 'Invalid group name.';
   }
 
-  testGroups[generateID()] = { name: name };
+  var gid = generateID();
+
+  testGroups[gid] = { name: name, id: gid, docs: {} };
+
+  return testGroups[gid];
 };

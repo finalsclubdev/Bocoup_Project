@@ -82,6 +82,10 @@ var colab = (function(io) {
     observers.notify(observers.groupEvents, 'get', data);
   });
 
+  groupSock.on('add', function(data) {
+    observers.notify(observers.groupEvents, 'add', data);
+  });
+
   //dockSock events.
   docSock.on('join', function(docID) {
     currDoc = {

@@ -78,7 +78,8 @@ var groupRoutes = io.of('/group')
 
     socket.on('add', function(name) {
       try {
-        groupDAO.add(name);
+        var group = groupDAO.add(name);
+        socket.json.emit('add', group);
       }
       catch(e) {
         socket.emit('err', e);

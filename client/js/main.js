@@ -46,26 +46,31 @@
             });
           },
           group: function(id) {
-            var group = FC.groups.get( id );
+            var group = FC.groups.get( id ),
+                respond = {
+                  success: function(grp) {
+                    FC.main.transition( new GroupView( {group: grp} ) );
+                  },
+                  error: function(grp) {
+                    console.log( "FAILURE", grp);
+                  }
+                };
+
             if ( !group ) {
-              return Backbone.history.navigate("404", true);
+              FC.groups.create({name: id}, respond);
+            } else {
+              group.fetch(respond);
             }
-            group.fetch({
-              success: function(grp) {
-                FC.main.transition( new GroupView( {group: grp} ) );
-              },
-              error: function(grp) {
-                console.log( "FAILURE", grp);
-              }
-            });
           },
           doc: function(groupid, docid) {
             var doc, group = FC.groups.get( groupid );
             if ( !group ) {
-              return Backbone.history.navigate("404", true);
+            // There is currently no document creation view, so we'll 404 for now
+              // If the group doesn't exist,
+              // automatically create it by going to #{groupid}
+              return Backbone.history.navigate(groupid, true);
             } 
             doc = group.docs.get(docid);
-            // There is currently no document creation view, so we'll 404 for now
             if ( !doc ) {
               return Backbone.history.navigate("404", true);
             }
@@ -126,12 +131,19 @@
               colab.removeGroupObserver( onRead );
             }
 
+            function onCreate( grp ) {
+              dfd.resolve( grp );
+              colab.removeGroupObserver( onCreate );
+            }
+
             switch( method ) {
               case "read":
-                colab.addGroupObserver('get', onRead);
+                colab.addGroupObserver("get", onRead);
                 colab.getGroup( group.id );
                 break;
               case "create":
+                colab.addGroupObserver("add", onCreate);
+                colab.addGroup( group.get("name") );
                 break;
               case "update":
                 break;
