@@ -13,7 +13,10 @@ hint:
 	@cd server-node && ${MAKE} hint
 	@cd client && ${MAKE} hint
 
-dist: check
+update_submodules:
+	${GIT} submodule init && ${GIT} submodule update
+
+dist: update_submodules check
 	${GIT} archive --format=tar --prefix=webapp/ HEAD | gzip > ${DIST_FILE}
 
 clean:
