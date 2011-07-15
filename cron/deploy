@@ -18,6 +18,7 @@ cd $REPO_ROOT
 
 # Pull the latest from git.
 $GIT pull $GIT_REMOTE $GIT_BRANCH > /dev/null
+make update_submodules
 
 # Restart the services.
 cd ./server-node
