@@ -2,6 +2,7 @@ var reporter = require('nodeunit').reporters.default;
 
 reporter.run([
   './tests/factories/DocFactoryTest.js',
+  './tests/factories/DatabaseFactoryTest.js',
   './tests/validators/UserValidatorTest.js',
   './tests/validators/DocValidatorTest.js',
   './tests/validators/GroupValidatorTest.js',
