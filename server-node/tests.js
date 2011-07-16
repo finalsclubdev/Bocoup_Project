@@ -9,5 +9,6 @@ reporter.run([
   './tests/DAOs/UserDAOTest.js',
   './tests/DAOs/GroupDAOTest.js',
   './tests/DAOs/DocDAOTest.js',
-  './tests/enums/OperationEnumTest.js'
+  './tests/enums/OperationEnumTest.js',
+  './tests/drivers/CouchDBDatabaseDriverTest.js'
 ]);
