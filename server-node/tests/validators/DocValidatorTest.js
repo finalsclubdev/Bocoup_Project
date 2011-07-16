@@ -1,7 +1,7 @@
 var docValidator = require('../../src/validators/DocValidator.js');
 
 exports['isValidID()'] = function(test) {
-  test.expect(7);
+  test.expect(8);
 
   test.equal(
     typeof docValidator.isValidID,
@@ -32,6 +32,11 @@ exports['isValidID()'] = function(test) {
   test.throws(
     function() { docValidator.isValidID('no spaces allowed'); },
     'Did not throw up on a string with spaces.'
+  );
+
+  test.throws(
+    function() { docValidator.isValidID('no:colons'); },
+    'Did not throw up on a colon.'
   );
 
   test.ok(
