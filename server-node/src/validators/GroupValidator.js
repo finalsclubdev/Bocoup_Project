@@ -17,3 +17,15 @@ exports.isValidID = function(id) {
 
   return true;
 };
+
+exports.isValidName = function(name) {
+  if(typeof name !== 'string') {
+    throw 'Invalid type of name.';
+  }
+
+  if(name.length <= 0) {
+    throw 'Group names must be at least one character.';
+  }
+
+  return true;
+};

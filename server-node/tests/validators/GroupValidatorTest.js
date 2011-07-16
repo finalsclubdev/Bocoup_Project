@@ -46,3 +46,35 @@ exports['isValidID()'] = function(test) {
 
   test.done();
 };
+
+exports['isValidName()'] = function(test) {
+  test.expect(5);
+
+  test.equal(
+    typeof groupValidator.isValidName,
+    'function',
+    'isValidName() is not a function.'
+  );
+
+  test.throws(
+    function() { groupValidator.isValidName(); },
+    'Did not throw up on no name.'
+  );
+
+  test.throws(
+    function() { groupValidator.isValidName(123); },
+    'Did not throw up on a non-string.'
+  );
+
+  test.throws(
+    function() { groupValidator.isValidName(''); },
+    'Did not throw up on an empty string.'
+  );
+
+  test.doesNotThrow(
+    function() { groupValidator.isValidName('valid'); },
+    'Threw up on a valid group name.'
+  );
+
+  test.done();
+};
