@@ -1,7 +1,7 @@
 var groupValidator = require('../../src/validators/GroupValidator.js');
 
 exports['isValidID()'] = function(test) {
-  test.expect(7);
+  test.expect(8);
 
   test.equal(
     typeof groupValidator.isValidID,
@@ -32,6 +32,11 @@ exports['isValidID()'] = function(test) {
   test.throws(
     function() { groupValidator.isValidID('no spaces allowed'); },
     'Did not throw up on a string with spaces.'
+  );
+
+  test.throws(
+    function() { groupValidator.isValidID('no:colons'); },
+    'Did not throw up on a colon.'
   );
 
   test.ok(

@@ -11,5 +11,9 @@ exports.isValidID = function(id) {
     throw 'IDs cannot have spaces. Replace them with dashes.';
   }
 
+  if(id.indexOf(':') >= 0) {
+    throw 'IDs cannot have colons.';
+  }
+
   return true;
 };
