@@ -1,3 +1,5 @@
+var dbDriver = require('../factories/DatabaseFactory.js').makeLibrary();
+
 var testGroups = {
   'grpID-A': {
     name: 'Group A'
@@ -32,12 +34,16 @@ exports.getList = function() {
  * @param {String} gid The ID of the group.
  * @returns {Object|false} Either the object or a false value if it doesn't exist.
  */
-exports.get = function(gid) {
+exports.get = function(gid, callback) {
   if(!gid || typeof gid != 'string') {
     throw 'Invalid group id.';
   }
 
-  return (testGroups[gid]) ? testGroups[gid] : false;
+  if(!callback || typeof callback !== 'function') {
+    throw 'Invalid callback.';
+  }
+
+  dbDriver.getGroup(gid, callback);
 };
 
 /**
