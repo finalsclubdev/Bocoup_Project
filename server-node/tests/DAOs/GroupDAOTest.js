@@ -71,7 +71,7 @@ exports['get()'] = function(test) {
   );
 
   test.doesNotThrow(
-    function() { groupDAO.get('valid', callback); },
+    function() { groupDAO.get('valid123', callback); },
     'Did not allow valid params.'
   );
 
