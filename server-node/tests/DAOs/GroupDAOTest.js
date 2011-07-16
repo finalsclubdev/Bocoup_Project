@@ -45,33 +45,34 @@ exports['getList()'] = function(test) {
 exports['get()'] = function(test) {
   test.expect(5);
 
+  var callback = function(err, doc) {
+    console.log('bwah', err, doc);
+  };
+
   test.equal(
     typeof groupDAO.get,
     'function',
     'get() is not a function.'
   );
 
-  var list = groupDAO.getList();
-
-  for(var i in list) {
-    test.ok(groupDAO.get(i));
-    break; //only do it once
-  }
-
   test.throws(
-    function() { groupDAO.get(123); },
+    function() { groupDAO.get(123, callback); },
     'Allowed a non-string ID.'
   );
 
   test.throws(
-    function() { groupDAO.get(null); },
+    function() { groupDAO.get(null, callback); },
     'Allowed a null ID.'
   );
 
-  test.strictEqual(
-    groupDAO.get('valid, non-existing id'),
-    false,
-    'Gave us a !== false value for a group that does not exist.'
+  test.throws(
+    function() { groupDAO.get('valid', null); },
+    'Allowed a null function.'
+  );
+
+  test.doesNotThrow(
+    function() { groupDAO.get('valid', callback); },
+    'Did not allow valid params.'
   );
 
   test.done();
