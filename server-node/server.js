@@ -62,14 +62,17 @@ var groupRoutes = io.of('/group')
 
     socket.on('get', function(id) {
       try {
-        var group = groupDAO.get(id);
+        groupDAO.get(id, function(err, group) {
+          if(err) {
+            socket.emit('err', err);
+          }
+          else {
+            group.id = id;
+            group.docs = docDAO.getByGID(id);
 
-        if(group) {
-          group.id = id;
-          group.docs = docDAO.getByGID(id);
-        }
-
-        socket.json.emit('get', group);
+            socket.emit('get', group);
+          }
+        });
       }
       catch(e) {
         socket.emit('err', e);
