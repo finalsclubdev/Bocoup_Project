@@ -7,7 +7,7 @@
 
 ## Dependencies
 
-* [Node.js](https://github.com/joyent/node/wiki/Installation)
+* [Node.js](https://github.com/joyent/node/wiki/Installation) Only tested with v0.4.8.
 
 
 ## Developing Locally
