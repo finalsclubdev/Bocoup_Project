@@ -65,14 +65,23 @@
           doc: function(groupid, docid) {
             var doc, group = FC.groups.get( groupid );
             if ( !group ) {
-            // There is currently no document creation view, so we'll 404 for now
               // If the group doesn't exist,
               // automatically create it by going to #{groupid}
               return Backbone.history.navigate(groupid, true);
             } 
             doc = group.docs.get(docid);
             if ( !doc ) {
-              return Backbone.history.navigate("404", true);
+              return group.docs.create({
+                  gid: group.id,
+                  name: docid
+                },{
+                success: function(d) {
+                  FC.main.transition( new DocView({doc: d}) );
+                },
+                error: function( excp ) {
+                  console.log("Document creation failed", excp);
+                }
+              })
             }
             FC.main.transition( new DocView({doc: doc}) );
           }
@@ -206,6 +215,31 @@
             });
             console.log("about to join", this.id);
             colab.joinDoc(this.id);
+          },
+          sync: function(method, doc, options) {
+            var dfd = jQuery.Deferred().always(function(resp) {
+              options.success.call(doc, resp);
+            });
+
+            function onCreate( d ) {
+              dfd.resolve( d );
+              colab.removeDocObserver( onCreate );
+            }
+
+            switch( method ) {
+              case "read":
+                break;
+              case "create":
+                colab.addDocObserver("add", onCreate);
+                colab.addDocument(  doc.get("name"), doc.get("gid") );
+                break;
+              case "update":
+                break;
+              case "delete":
+                break;
+            }
+
+            return dfd;
           }
         }),
 
