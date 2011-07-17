@@ -79,7 +79,7 @@ exports['get()'] = function(test) {
 };
 
 exports['add()'] = function(test) {
-  test.expect(7);
+  test.expect(4);
 
   test.equal(
     typeof groupDAO.add,
@@ -87,42 +87,20 @@ exports['add()'] = function(test) {
     'add() is not a funciton.'
   );
 
-  var before = groupDAO.getList();
-
-  var numBefore = 0;
-
-  for(var i in before) {
-    if(before.hasOwnProperty(i)) {
-      numBefore++;
-    }
-  }
-
   test.doesNotThrow(
-    function() { groupDAO.add('name'); },
+    function() { groupDAO.add('name', function() { }); },
     'Threw up on valid input.'
   );
 
   test.throws(
-    function() { groupDAO.add(null); },
+    function() { groupDAO.add(null, function() { }); },
     'Did not throw up on an invalid name.'
   );
 
-  var after = groupDAO.getList();
-  var numAfter = 0;
-
-  for(var i in after) {
-    if(after.hasOwnProperty(i)) {
-      numAfter++;
-
-      test.equal(
-        typeof after[i].name,
-        'string',
-        'There is a group without a name.'
-      );
-    }
-  }
-    
-  test.strictEqual(numAfter, numBefore + 1, 'Group did not get added.');
+  test.throws(
+    function() { groupDAO.add('name', 123); },
+    'Did not throw up on an invalid callback.'
+  );
 
   test.done();
 };
