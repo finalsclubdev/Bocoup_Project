@@ -23,8 +23,8 @@
             "404": "404",
             "login": "login",
             "groups": "groupList",
-            ":groupid": "group",
-            ":groupid/:docid": "doc"
+            "group/:groupid": "group",
+            "group/:groupid/:docid": "doc"
           },
           home: function() {
             // If there is no user in localStorage, direct to login
