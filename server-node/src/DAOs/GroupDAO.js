@@ -1,4 +1,5 @@
 var dbDriver = require('../factories/DatabaseFactory.js').makeLibrary();
+var groupValidator = require('../validators/GroupValidator.js');
 
 var testGroups = {
   'grpID-A': {
@@ -35,7 +36,7 @@ exports.getList = function() {
  * @returns {Object|false} Either the object or a false value if it doesn't exist.
  */
 exports.get = function(gid, callback) {
-  if(!gid || typeof gid != 'string') {
+  if(!groupValidator.isValidID(gid)) {
     throw 'Invalid group id.';
   }
 
@@ -52,7 +53,7 @@ exports.get = function(gid, callback) {
  * @param {String} name The name of the group for display.
  */
 exports.add = function(name) {
-  if(!name || typeof name != 'string') {
+  if(!groupValidator.isValidName(name)) {
     throw 'Invalid group name.';
   }
 
