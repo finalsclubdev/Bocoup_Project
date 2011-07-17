@@ -43,16 +43,18 @@ exports.get = function(gid) {
 /**
  * Creates a new group.
  *
- * @param {String} name The name of the group for display.
+ * @param {String} slug The url slug of the group, initially serves as group name
  */
-exports.add = function(name) {
-  if(!name || typeof name != 'string') {
-    throw 'Invalid group name.';
+exports.add = function(slug) {
+  if(!slug || typeof slug != 'string') {
+    throw 'Invalslug group name.';
   }
 
-  var gid = generateID();
+  if(testGroups[slug]) {
+    throw 'A group with that slug already exists.';
+  }
 
-  testGroups[gid] = { name: name, id: gid, docs: {} };
+  testGroups[slug] = { name: slug, id: slug, docs: {} };
 
-  return testGroups[gid];
+  return testGroups[slug];
 };

@@ -122,7 +122,6 @@ var colab = (function(io) {
   });
 
   docSock.on('add', function(newDoc) {
-    console.log(newDoc);
     observers.notify(observers.docEvents, 'add', newDoc);
   });
 
@@ -258,10 +257,10 @@ var colab = (function(io) {
     /**
      * Adds a group.
      *
-     * @param {String} name The name of the group. This is not unique.
+     * @param {String} slug The unique url slug for the group.
      */
-    addGroup: function(name) {
-      groupSock.emit('add', name);
+    addGroup: function(slug) {
+      groupSock.emit('add', slug);
     },
 
     /**

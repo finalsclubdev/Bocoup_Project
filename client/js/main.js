@@ -14,7 +14,7 @@
     });
 
     Handlebars.registerHelper("documentName", function(doc) {
-      return doc.name || doc.text.substring(0,20) + "...";
+      return doc.id || doc.text.substring(0,20) + "...";
     });
 
     var Router = Backbone.Router.extend({
@@ -45,8 +45,8 @@
               }
             });
           },
-          group: function(id) {
-            var group = FC.groups.get( id ),
+          group: function( slug ) {
+            var group = FC.groups.get( slug ),
                 respond = {
                   success: function(grp) {
                     FC.main.transition( new GroupView( {group: grp} ) );
@@ -57,7 +57,7 @@
                 };
 
             if ( !group ) {
-              FC.groups.create({name: id}, respond);
+              FC.groups.create({slug: slug}, respond);
             } else {
               group.fetch(respond);
             }
@@ -143,7 +143,7 @@
                 break;
               case "create":
                 colab.addGroupObserver("add", onCreate);
-                colab.addGroup( group.get("name") );
+                colab.addGroup( group.get("slug") );
                 break;
               case "update":
                 break;
