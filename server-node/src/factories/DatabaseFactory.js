@@ -2,9 +2,10 @@ exports.makeLibrary = function() {
   var dbDriver = require('../drivers/CouchDBDatabaseDriver.js');
 
   var cradle = require('cradle');
-  cradle.setup({ host: 'http://sbisbee.cloudant.com' });
 
-  dbDriver.db = new(cradle.Connection)().database('fc');
+  dbDriver.db = new(cradle.Connection)('http://sbisbee.cloudant.com', 5984, {
+    raw: true
+  }).database('fc');
 
   return dbDriver;
 };
