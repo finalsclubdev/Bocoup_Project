@@ -32,7 +32,12 @@ var colab = (function(io) {
 
   //A socket wide function for handling errors.
   function onError(msg) {
-    console.log('err', msg);
+    if(api && api.onError) {
+      api.onError(msg);
+    }
+    else {
+      console.log('err', msg);
+    }
   }
 
   //Stores the current user's info.
@@ -52,6 +57,7 @@ var colab = (function(io) {
   //Bind to the error events with our global handler.
   userSock.on('err', onError);
   groupSock.on('err', onError);
+  docSock.on('err', onError);
 
   //userSock events.
   userSock.on('connect', function() {
