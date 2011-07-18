@@ -240,7 +240,12 @@ var colab = (function(io) {
 
     //Tells the API to update the current user's cursor position.
     updateCursor: function(pos) {
-      docSock.emit('cursor', { uid: currUser.id, docID: currDoc.id, pos: pos });
+      docSock.emit('cursor', {
+        uid: currUser.id,
+        docID: currDoc.id,
+        pos: pos,
+        gid: currDoc.gid
+      });
     },
 
     /**

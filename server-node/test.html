@@ -5,6 +5,10 @@
     <script src="../client/js/libs/socket.io.js"></script>
     <script src="../client/js/colab.js"></script>
     <script>
+    colab.addDocObserver('cursor', function(d) {
+      console.log('cursor', d);
+    });
+
     colab.addDocObserver('join', function(id) {
       console.log('just joined', id);
     });
