@@ -93,13 +93,14 @@ var colab = (function(io) {
   });
 
   //dockSock events.
-  docSock.on('join', function(docID) {
+  docSock.on('join', function(data) {
     currDoc = {
-      id: docID,
+      id: data.id,
+      gid: data.gid,
       lastSeenSeq: null
     };
 
-    observers.notify(observers.docEvents, 'join', docID);
+    observers.notify(observers.docEvents, 'join', data);
   });
 
   docSock.on('part', function() {
@@ -213,7 +214,7 @@ var colab = (function(io) {
      * Tells the API to join a user to a document. Automatically parts them
      * from any currently joined document.
      */
-    joinDoc: function(docID) {
+    joinDoc: function(gid, docID) {
       if(currUser.id) {
         if(currDoc.id) {
           api.partDoc();
@@ -221,6 +222,7 @@ var colab = (function(io) {
 
         docSock.emit('join', {
           uid: currUser.id,
+          gid: gid,
           docID: docID
         });
       }

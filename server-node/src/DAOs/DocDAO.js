@@ -5,7 +5,7 @@ var docValidator = require('../validators/DocValidator.js');
 var groupValidator = require('../validators/GroupValidator.js');
 var dbDriver = require('../factories/DatabaseFactory.js').makeLibrary();
 
-//map of docid => uid
+//map of "gid/docid" => uid
 var docStates = {};
 
 //map of uid => docid
@@ -102,40 +102,51 @@ exports.getByGID = function(gid) {
  *
  * @param {String} docID The document's ID.
  *
- * @return {Object|undefined} If we end up creating a new state for the
- * document, then it gets returned. If the document already has a state, then
- * we don't return anything. This gives our parents one chance to subscribe as
- * observers.
+ * @param {String} gid The document's group's ID.
+ *
+ * @param {Function} callback The callback: fn(state, err) - state is only set
+ * if the user is the first to join the document. err is only set if there was
+ * an error (ex., the document doesn't exist).
  */
-exports.join = function(uid, docID) {
+exports.join = function(uid, docID, gid, callback) {
   if(!userValidator.isName(uid)) {
     throw 'Invalid UID.';
   }
 
-  if(!docID || typeof docID != 'string') {
-    throw 'Invalid document ID.';
+  if(!docValidator.isValidID(docID)) {
+    throw 'Invalid DocID.';
   }
 
-  var newDocState = false;
+  if(!groupValidator.isValidID(gid)) {
+    throw 'Invalid gid.';
+  }
 
-  if(!docStates[docID]) {
-    newDocState = true;
+  if(typeof callback != 'function') {
+    throw 'Invalid callback.';
+  }
 
-    var doc = this.get(docID);
+  var mapID = gid + '/' + docID;
 
-    if(!doc) {
-      throw 'That document does not exist yet.';
+  var newDocState = true;
+
+  this.get(docID, gid, function(err, doc) {
+    if(err) {
+      callback(null, err);
     }
+    else {
+      var newDocState = false;
 
-    docStates[docID] = docFactory.makeDocState(doc);
-  }
+      if(!docStates[mapID]) {
+        newDocState = true;
+        docStates[mapID] = docFactory.makeDocState(doc);
+      }
 
-  users[uid] = docID;
-  docStates[docID].joinUser(uid);
+      users[uid] = mapID;
+      docStates[mapID].joinUser(uid);
 
-  if(newDocState) {
-    return docStates[docID];
-  }
+      callback(((newDocState) ? docStates[mapID] : null), null);
+    }
+  });
 };
 
 exports.part = function(uid, docID) {

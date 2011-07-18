@@ -100,51 +100,57 @@ var docRoutes = io.of('/doc')
   .on('connection', function(socket) {
     socket.on('join', function(data) {
       try {
-        var state = docDAO.join(data.uid, data.docID);
-
-        if(state) {
-          state.addCursorObserver(function(docID, uid, pos) {
-            var users = docDAO.getJoinedUsers(docID);
-
-            for(var i in users) {
-              if(users.hasOwnProperty(i) && i !== uid) {
-                var user = userDAO.get(i);
-
-                if(user) {
-                  var sid = user.sessionID;
-
-                  if(socket.namespace.sockets[sid]) {
-                    socket.namespace.sockets[sid].emit('cursor', { uid: uid, pos: pos });
-                  }
-                  else {
-                    console.log('No socket found for sessionID "'+sid+'"');
-                  }
-                }
-                else {
-                  //TODO do something about it.
-                  console.warn('There is a disconnected user still joined to a document.');
-                }
-              }
-            }
-          });
-
-          state.addChangeObserver(function(data) {
-            if(data.toUser) {
-              socket.namespace.sockets[userDAO.get(data.toUser).sessionID].emit('change', data.command);
-            }
-            else {
-              var users = docDAO.getJoinedUsers(data.docID);
+        docDAO.join(data.uid, data.docID, data.gid, function(state, err) {
+          if(err) {
+            socket.emit('err', err);
+          }
+          else if(state) {
+            // Add a listener for the cursor change event.
+            state.addCursorObserver(function(docID, uid, pos) {
+              var users = docDAO.getJoinedUsers(docID);
 
               for(var i in users) {
-                if(users.hasOwnProperty(i)) {
-                  socket.namespace.sockets[userDAO.get(i).sessionID].emit('change', data.command);
+                if(users.hasOwnProperty(i) && i !== uid) {
+                  var user = userDAO.get(i);
+
+                  if(user) {
+                    var sid = user.sessionID;
+
+                    if(socket.namespace.sockets[sid]) {
+                      socket.namespace.sockets[sid].emit('cursor', { uid: uid, pos: pos });
+                    }
+                    else {
+                      console.log('No socket found for sessionID "'+sid+'"');
+                    }
+                  }
+                  else {
+                    //TODO do something about it.
+                    console.warn('There is a disconnected user still joined to a document.');
+                  }
                 }
               }
-            }
-          });
-        }
+            });
 
-        socket.emit('join', data.docID);
+            // Add a listener for the document change event (commands).
+            state.addChangeObserver(function(data) {
+              if(data.toUser) {
+                socket.namespace.sockets[userDAO.get(data.toUser).sessionID].emit('change', data.command);
+              }
+              else {
+                var users = docDAO.getJoinedUsers(data.docID);
+
+                for(var i in users) {
+                  if(users.hasOwnProperty(i)) {
+                    socket.namespace.sockets[userDAO.get(i).sessionID].emit('change', data.command);
+                  }
+                }
+              }
+            });
+          }
+
+          // Tell them that they joined after everything is set up.
+          socket.emit('join', { id: data.docID, gid: data.gid });
+        });
       }
       catch(e) {
         socket.emit('err', e);

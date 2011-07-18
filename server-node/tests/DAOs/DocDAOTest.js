@@ -81,42 +81,37 @@ exports['getByGID()'] = function(test) {
 };
 
 exports['join()'] = function(test) {
-  test.expect(8);
 
   test.equal(typeof docDAO.join, 'function', 'join() is not a funciton.');
 
+//uid, gid, did, callback
   test.throws(
-    function() { docDAO.join(null, null); },
+    function() { docDAO.join(null, '123123', '123123', function() { }); },
     'Does not throw on invalid UID.'
   );
 
   test.throws(
-    function() { docDAO.join('valid', null); },
-    'Does not throw on invalid doc ID.'
-  );
-
-  var state;
-
-  test.doesNotThrow(
-    function() { state = docDAO.join('bwah', 'one'); },
-    'Got an exception when joining a valid user.'
-  );
-
-  test.equal(typeof state, 'object', 'Did not get an object on first join.');
-
-  test.doesNotThrow(
-    function() { state = docDAO.join('boo', 'one'); },
-    'Got an exception when joining the second valid user.'
-  );
-
-  test.equal(
-    typeof state,
-    'undefined',
-    'Got a defined value when joining the second user.'
+    function() { docDAO.join('123123', null, '123123', function() { }); },
+    'Does not throw on invalid group ID.'
   );
 
   test.throws(
-    function() { docDAO.join('hi', 'non-existing doc'); },
+    function() { docDAO.join('123123', '123123', null, function() { }); },
+    'Does not throw on invalid doc ID.'
+  );
+
+  test.throws(
+    function() { docDAO.join('123123', '123123', '123123', 123123); },
+    'Does not throw on invalid callback.'
+  );
+
+  test.doesNotThrow(
+    function() { docDAO.join('123123', 'grpID-A', 'some-doc-slug', function() { }); },
+    'Threw up on valid input.'
+  );
+
+  test.throws(
+    function() { docDAO.join('123123', 'grpID-A', 'non-existing doc', function() { }); },
     'Did not throw when the document does not exist.'
   );
 

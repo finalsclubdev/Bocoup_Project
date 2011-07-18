@@ -5,8 +5,14 @@
     <script src="../client/js/libs/socket.io.js"></script>
     <script src="../client/js/colab.js"></script>
     <script>
+    colab.addDocObserver('join', function(id) {
+      console.log('just joined', id);
+    });
+
     colab.addDocObserver('get', function(doc) {
       console.log('just got a new doc', doc);
+
+      colab.joinDoc(doc.gid, doc.id);
     });
 
     colab.login(prompt('login'));
