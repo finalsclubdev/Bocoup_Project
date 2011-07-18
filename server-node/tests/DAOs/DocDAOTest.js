@@ -13,7 +13,7 @@ exports['instantiation'] = function(test) {
 };
 
 exports['get()'] = function(test) {
-  test.expect(9);
+  test.expect(5);
 
   test.equal(
     typeof docDAO.get,
@@ -21,51 +21,24 @@ exports['get()'] = function(test) {
     'get() is not a function.'
   );
 
-  test.strictEqual(
-    docDAO.get('non-existing, valid id'),
-    null,
-    'Returned a non-null value when there was no doc.'
+  test.throws(
+    function() { docDAO.get(null, '123123', function() { }); },
+    'Did not throw up on invalid doc id.'
   );
 
   test.throws(
-    function() { docDAO.get(null); },
-    'Does not throw on a null id.'
+    function() { docDAO.get('123123', null, function() { }); },
+    'Did not throw up on invalid group id.'
   );
 
   test.throws(
-    function() { docDAO.get(''); },
-    'Does not throw on an empty string.'
+    function() { docDAO.get('123123', '123123', 123123); },
+    'Did not throw up on invalid callback.'
   );
 
-  test.throws(
-    function() { docDAO.get(123); },
-    'Does not throw on an integer for an id.'
-  );    
-
-  var doc = docDAO.get('one');
-
-  test.equal(
-    typeof doc,
-    'object',
-    'Got a non-object document.'
-  );
-
-  test.equal(
-    typeof doc.gid,
-    'string',
-    'Got a non-string group id.'
-  );
-
-  test.equal(
-    typeof doc.seq,
-    'number',
-    'Got a non-numeric sequence number.'
-  );
-
-  test.equal(
-    typeof doc.text,
-    'string',
-    'Got a non-string text.'
+  test.doesNotThrow(
+    function() { docDAO.get('non-existing-valid-id', 'grpID-A', function() { }); },
+    'Threw up on valid input.'
   );
 
   test.done();
