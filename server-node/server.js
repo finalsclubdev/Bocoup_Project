@@ -79,9 +79,9 @@ var groupRoutes = io.of('/group')
       }
     });
 
-    socket.on('add', function(name) {
+    socket.on('add', function(id) {
       try {
-        groupDAO.add(name, function(err, group) {
+        groupDAO.add(id, function(err, group) {
           if(err) {
             socket.emit('err', err);
           }

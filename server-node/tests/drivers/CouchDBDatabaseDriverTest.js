@@ -30,28 +30,25 @@ exports['createGroup()'] = function(test) {
   test.equal(typeof db.createGroup, 'function', 'createGroup() is not a function.');
 
   test.throws(
-    function() { db.createGroup(123, 'valid', function() { }); },
+    function() { db.createGroup(123, function() { }); },
     'Invalid gid.'
   );
 
   test.throws(
-    function() { db.createGroup('gid', null, function() { }); },
-    'Invalid name.'
-  );
-
-  test.throws(
-    function() { db.createGroup('gid', 'name', true); },
+    function() { db.createGroup('gid', true); },
     'Invalid callback.'
   );
 
   test.doesNotThrow(
     function() {
-      db.createGroup('1234567', '7654321', function(err, data) {
-        console.log(1111);
+      var id = ''+Math.floor(Math.random() * 1000000);
+
+      db.createGroup(id, function(err, data) {
+        test.equal(err, null, 'There was an error.');
+
+        test.done();
       });
     },
     'Threw despite a perfectly fine callback.'
   );
-
-  test.done();
 };

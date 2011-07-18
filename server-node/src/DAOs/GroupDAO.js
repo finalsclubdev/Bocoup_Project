@@ -50,18 +50,18 @@ exports.get = function(gid, callback) {
 /**
  * Creates a new group.
  *
- * @param {String} name The name of the group for display.
+ * @param {String} id The id of the group.
  *
  * @param {Function} callback The resulting callback: callback(err, data)
  */
-exports.add = function(name, callback) {
-  if(!groupValidator.isValidName(name)) {
-    throw 'Invalid group name.';
+exports.add = function(id, callback) {
+  if(!groupValidator.isValidID(id)) {
+    throw 'Invalid group ID.';
   }
 
   if(typeof callback !== 'function') {
     throw 'Invalid callback.';
   }
 
-  dbDriver.createGroup(generateID(), name, callback);
+  dbDriver.createGroup(id, callback);
 };

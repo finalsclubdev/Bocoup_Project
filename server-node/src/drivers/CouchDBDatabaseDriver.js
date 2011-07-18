@@ -22,34 +22,29 @@ exports.getGroup = function(gid, callback) {
   this.db.get(makeGroupID(gid), callback);
 };
 
-exports.createGroup = function(gid, name, callback) {
+exports.createGroup = function(gid, callback) {
   if(!groupValidator.isValidID(gid)) {
     throw 'Invalid gid.';
   }
 
-  if(!groupValidator.isValidName(name)) {
-    throw 'Invalid group name.';
+  if(typeof callback != 'function') {
+    throw 'Invalid callback.';
   }
 
   gid = 'group:' + gid;
 
-  this.db.save(
+  this.db.put(
     gid,
-    {
-      name: name
-    },
+    {},
     function(err, res) {
       if(!err) {
-        callback(
-          err,
-          {
-            _id: res._id,
-            _rev: res._rev,
-            name: name
-          }
-        );
+        callback(err, { id: res._id });
       }
       else {
+        if(err.error === 'conflict') {
+          err = 'That group already exists.';
+        }
+
         callback(err, res);
       }
     }
@@ -69,11 +64,17 @@ exports.createDoc = function(doc, callback) {
     throw 'Invalid callback.';
   }
 
-  this.db.save(
+  this.db.put(
     makeDocID(doc.id, doc.gid),
     doc,
     function(err, res) {
-      delete doc._rev;
+      if(err && err.error === 'conflict') {
+        err = 'That document already exists.';
+      }
+      else {
+        delete doc._rev;
+      }
+
       callback(err, doc);
     }
   );

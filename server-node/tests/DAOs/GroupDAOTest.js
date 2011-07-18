@@ -87,7 +87,7 @@ exports['add()'] = function(test) {
   );
 
   test.doesNotThrow(
-    function() { groupDAO.add('name', function() { }); },
+    function() { groupDAO.add('123123', function() { }); },
     'Threw up on valid input.'
   );
 
@@ -97,7 +97,7 @@ exports['add()'] = function(test) {
   );
 
   test.throws(
-    function() { groupDAO.add('name', 123); },
+    function() { groupDAO.add('123123', 123); },
     'Did not throw up on an invalid callback.'
   );
 
