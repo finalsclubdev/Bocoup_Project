@@ -209,13 +209,6 @@
             name: "",
             text: ""
           },
-          join: function() {
-            colab.addDocObserver("join", function(doc) { 
-              console.log("JOINED", doc);
-            });
-            console.log("about to join", this.id);
-            colab.joinDoc(this.id);
-          },
           sync: function(method, doc, options) {
             var dfd = jQuery.Deferred().always(function(resp) {
               options.success.call(doc, resp);
@@ -346,7 +339,7 @@
         // temporary data for generating messages
         tmp = {
           chars: "\n 12345\n67890!\n@#$%^&*()\nabcdef\nghijklmno\npqrstuv\nwxyz",
-          actions: ["write", "remove"]
+          actions: ["INSERT", "DELETE"]
         },
 
         DocView = Backbone.View.extend({
@@ -354,26 +347,21 @@
           initialize: function(options) {
             _.bindAll(this);
             this.doc = options.doc;
-            this.doc.join();
-            colab.addDocObserver('cursor', function(data) {
-              console.log('cursor update', data);
-            });
-
           },
           events: {
             "click .toggleMessages": "toggleMessages"
           },
           generateMessage: function() {
             var msg = {
-              act: tmp.actions[ Math.floor(Math.random() * tmp.actions.length) ],
-              from: Math.floor(Math.random() * this.editor.session.getValue().length)
+              op: tmp.actions[ Math.floor(Math.random() * tmp.actions.length) ],
+              pos: Math.floor(Math.random() * this.editor.ace.session.getValue().length)
             };
 
-            switch (msg.act) {
-              case "write":
+            switch (msg.op) {
+              case "INSERT":
                 msg.val = tmp.chars.charAt( Math.floor(Math.random() * tmp.chars.length) )["to" + (Math.random() > 0.5 ? "Upper" : "Lower") + "Case"]();
                 break;
-              case "remove":
+              case "DELETE":
                 msg.val = 1;
                 break;
             }
@@ -389,67 +377,16 @@
             } else {
               $t.text("Stop Messages");
               this.msgInterval = setInterval(_.bind(function() {
-                this.trigger("socketmessage", this.generateMessage());
+                this.editor.remoteChange( this.generateMessage() );
               },this),250);
             }
           },
           render: function() {
             var data = this.options.doc.toJSON();
             $(this.el).html(this.template(data));
-            this.editor = ace.edit( $(this.el).find("div.editor")[0] );
-            this.editor.session.on("change", _.bind(this.change, this) );
-            this.bind("socketmessage", this.socketmessage);
+            this.editor = new ColabEditor( $(this.el).find("div.editor")[0], data);
             return this;
-          },
-          change: function(event) {
-            var action = event.data.action,
-                position = this.getEditPosition(event);
-
-            switch (action) {
-            case "insertText":
-              break;
-            case "removeText":
-              break;
-            }
-
-            this.options.doc.set({
-              text: this.editor.session.getValue()
-            });
-
-            this.options.doc.save();
-          },
-          getEditPosition: function(event) {
-            var i = 0,
-            pos = 0,
-            start = event.data.range.start.row;
-
-            // Calculate the length of all the rows of text before the edit
-            while(i <= start) {
-              // Make sure that a blank line counts
-              pos = pos + (this.editor.session.doc.$lines[i].length || 1);
-              i++;
-            }
-
-            // Add the column of where the edit was made
-            pos = pos + event.data.range.start.column + 1;
-
-            return pos;
-          },
-          socketmessage: function(msg) {
-            this["on" + msg.act.charAt(0).toUpperCase() + msg.act.substr(1)](msg);
-          },
-          onWrite: function(msg) {
-            var value = this.editor.session.getValue();
-            this.editor.session.setValue( value.substr(0, msg.from) + msg.val + value.substr(msg.from) );
-          },
-          onRemove: function(msg) {
-            var value = this.editor.session.getValue();
-            this.editor.session.setValue(value.substr(0, msg.from - msg.val) + value.substr(msg.from));
-          },
-          onAnnounce: function(msg) {
-            console.log("announce");
           }
-
         }),
 
         FC = window.FC = {
