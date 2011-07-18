@@ -3,28 +3,15 @@ var docFactory = require('../factories/DocFactory.js');
 var userValidator = require('../validators/UserValidator.js');
 var docValidator = require('../validators/DocValidator.js');
 var groupValidator = require('../validators/GroupValidator.js');
-
-//map of id => doc
-var docs = {
-  'one': {
-    id: 'one',
-    gid: 'grpID-A',
-    seq: 23,
-    text: 'Hello there, how are you today?'
-  },
-  'two': {
-    id: 'two',
-    gid: 'grpID-A',
-    seq: 100,
-    text: 'This is another document.'
-  }
-};
+var dbDriver = require('../factories/DatabaseFactory.js').makeLibrary();
 
 //map of docid => uid
 var docStates = {};
 
 //map of uid => docid
 var users = {};
+
+var docs = {};
 
 /**
  * Creates a new document in a group with a provided ID and returns it.
@@ -33,9 +20,9 @@ var users = {};
  *
  * @param {String} gid The group's ID. The group must exist.
  *
- * @returns The new document.
+ * @param {Function} callback The callback: fn(err, doc)
  */
-exports.add = function(id, gid) {
+exports.add = function(id, gid, callback) {
   if(!docValidator.isValidID(id)) {
     throw 'That is not a valid document ID.';
   }
@@ -44,18 +31,19 @@ exports.add = function(id, gid) {
     throw 'That is not a valid group ID.';
   }
 
-  if(docs[id] && docs[id].gid === gid) {
-    throw 'A document with that slug already exists in that group.';
+  if(typeof callback !== 'function') {
+    throw 'Invalid callback.';
   }
 
-  docs[id] = {
-    id: id,
-    gid: gid,
-    seq: null,
-    text: ''
-  };
-
-  return docs[id];
+  dbDriver.createDoc(
+    {
+      id: id,
+      gid: gid,
+      seq: null,
+      text: ''
+    },
+    callback
+  );
 };
 
 /**
@@ -63,14 +51,24 @@ exports.add = function(id, gid) {
  *
  * @param {String} id The document's ID.
  *
- * @returns {Object|null} The document object, or null if it doesn't exist.
+ * @param {String} gid The group's ID.
+ *
+ * @param {Function} callback The callback: fn(err, doc)
  */
-exports.get = function(id) {
-  if(!id || typeof id != 'string') {
-    throw 'Invalid document ID.';
+exports.get = function(id, gid, callback) {
+  if(!docValidator.isValidID(id)) {
+    throw 'That is not a valid document ID.';
   }
 
-  return docs[id] || null;
+  if(!groupValidator.isValidID(gid)) {
+    throw 'That is not a valid group ID.';
+  }
+
+  if(typeof callback !== 'function') {
+    throw 'Invalid callback.';
+  }  
+
+  dbDriver.getDoc(id, gid, callback);
 };
 
 /**

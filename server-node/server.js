@@ -171,7 +171,30 @@ var docRoutes = io.of('/doc')
 
     socket.on('add', function(data) {
       try {
-        socket.emit('add', docDAO.add(data.id, data.gid));
+        docDAO.add(data.id, data.gid, function(err, doc) {
+          if(err) {
+            socket.emit('err', err);
+          }
+          else {
+            socket.emit('add', doc);
+          }
+        });
+      }
+      catch(e) {
+        socket.emit('err', e);
+      }
+    });
+
+    socket.on('get', function(data) {
+      try {
+        docDAO.get(data.id, data.gid, function(err, doc) {
+          if(err) {
+            socket.emit('err', err);
+          }
+          else {
+            socket.emit('get', doc);
+          }
+        });
       }
       catch(e) {
         socket.emit('err', e);
