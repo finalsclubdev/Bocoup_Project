@@ -1,0 +1,31 @@
+
+Mac OSX 10.6.8
+
+Already installed:
+	node 0.4.0
+	npm
+
+18-Jul-11 Attempt to install/setup dev system
+	08:51 - Fetched instructions from Petes email.
+	08:51 - cloned finalsclub repo
+	08:51 - read README
+	08:51 - cloned paperboy for http service
+	08:59 - tweaked paperboy to use client dir, and port 1234
+	09:02 - started paperboy - returning files OK
+	09:02 - added entry in hosts file for dev.finalsclub.org
+	09:02 - started fc server
+	09:02 - loaded page in browser
+	09:03 - server exception, Address family not supported by protocol family
+	09:05 - restart server. reload page. just get white page w/title.
+	09:06 - noticed js error in browser about missing file ace.js
+	09:12 - asked adam about not-found ace.js
+	09:17 - tried submodule update in ace dir. didn't appear to be a git repo dir.
+	09:17 - cloning fresh copy of ace at same location of the one from FC repo
+	09:18 - did submod update
+	09:19 - that fixed ace.js problem. restarted server, reloaded page, still white screen
+	09:21 - was loading from localhost, changed to dev.finalsclub.org in case it mattered, got login
+	09:21 - clicking group-a gives address family exception again
+	09:37 - passed exception to sam, in skype txt, but hes not online
+	*** basically stuck here unless I start debugging
+
+
