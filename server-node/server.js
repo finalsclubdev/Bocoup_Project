@@ -106,8 +106,8 @@ var docRoutes = io.of('/doc')
           }
           else if(state) {
             // Add a listener for the cursor change event.
-            state.addCursorObserver(function(docID, uid, pos) {
-              var users = docDAO.getJoinedUsers(docID);
+            state.addCursorObserver(function(gid, docID, uid, pos) {
+              var users = docDAO.getJoinedUsers(gid, docID);
 
               for(var i in users) {
                 if(users.hasOwnProperty(i) && i !== uid) {
@@ -159,7 +159,7 @@ var docRoutes = io.of('/doc')
 
     socket.on('cursor', function(data) {
       try {
-        docDAO.updateCursor(data.docID, data.uid, data.pos);
+        docDAO.updateCursor(data.gid, data.docID, data.uid, data.pos);
       }
       catch(e) {
         socket.emit('err', e);
