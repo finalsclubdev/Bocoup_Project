@@ -46,7 +46,6 @@ exports['get()'] = function(test) {
   test.expect(5);
 
   var callback = function(err, doc) {
-    console.log('bwah', err, doc);
   };
 
   test.equal(
