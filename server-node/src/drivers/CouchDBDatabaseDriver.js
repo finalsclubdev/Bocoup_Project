@@ -73,10 +73,7 @@ exports.createDoc = function(doc, callback) {
     makeDocID(doc.id, doc.gid),
     doc,
     function(err, res) {
-      if(!err) {
-        doc._rev = res._rev;
-      }
-
+      delete doc._rev;
       callback(err, doc);
     }
   );

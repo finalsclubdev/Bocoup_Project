@@ -128,53 +128,47 @@ exports['updateCursor()'] = function(test) {
   );
 
   test.throws(
-    function() { docDAO.updateCursor('empty doc', 'uid', 3); },
+    function() { docDAO.updateCursor('gid', 'empty doc', 'uid', 3); },
     'Allowed us to update a doc that does not have a state.'
   );
 
-  docDAO.join('uid', 'one');
+  docDAO.join('uid123123', 'some-doc-slug', 'grpID-A', function(err, state) {
+    test.doesNotThrow(
+      function() { docDAO.updateCursor('grpID-A', 'some-doc-slug', 'uid123123', 3); },
+      'Did not allow us to update a doc that does have a state and that we joined.'
+    );
 
-  test.doesNotThrow(
-    function() { docDAO.updateCursor('one', 'uid', 3); },
-    'Did not allow us to update a doc that does have a state and that we joined.'
-  );
-
-  test.done();
+    test.done();
+  });
 };
 
 exports['getJoinedUsers()'] = function(test) {
-
-  test.expect(6);
+  test.expect(4);
 
   test.throws(
-    function() { docDAO.getJoinedUsers('two'); },
+    function() { docDAO.getJoinedUsers('gid123123', 'did123123'); },
     'Did not throw up when no one has joined the doc yet.'
   );
 
-  var users;
-
   test.doesNotThrow(
-    function() { users = docDAO.getJoinedUsers('one'); },
-    'Threw up on a valid, existing doc ID.'
+    function() {
+      docDAO.join('uiduiduid', 'some-doc-slug', 'grpID-A', function(data, err) {
+        test.equal(err, null, 'There was a problem joining the doc.');
+
+        test.doesNotThrow(
+          function() { docDAO.getJoinedUsers('grpID-A', 'some-doc-slug'); },
+          'Threw up on a valid, existing doc ID.'
+        );
+
+        test.done();
+      });
+    },
+    'join() threw'
   );
-
-  test.equal(
-    typeof users,
-    'object',
-    'Did not return the proper type.'
-  );
-
-  for(var i in users) {
-    if(users.hasOwnProperty(i)) {
-      test.equal(typeof users[i].cursorPos, 'number', 'Invalid cursor position.');
-    }
-  }
-
-  test.done();
 };
 
 exports['getUserJoinedDoc()'] = function(test) {
-  test.expect(6);
+  test.expect(7);
 
   test.equal(
     typeof docDAO.getUserJoinedDoc,
@@ -194,24 +188,24 @@ exports['getUserJoinedDoc()'] = function(test) {
   );
 
   test.doesNotThrow(
-    function() { docDAO.join('bwahuser', 'one'); },
+    function() {
+      docDAO.join('bwahuser', 'some-doc-slug', 'grpID-A', function(data, err) {
+        test.equal(err, null, 'There was a problem joining the doc.');
+
+        var docID;
+
+        test.doesNotThrow(
+          function() { docID = docDAO.getUserJoinedDoc('bwahuser'); },
+          'Threw up on a valid uid.'
+        );
+
+        test.strictEqual(docID, 'some-doc-slug', 'Did not return the proper doc id.');
+
+        test.done();
+      });
+    },
     'Threw up on joining the doc.'
   );
-
-  var doc;
-
-  test.doesNotThrow(
-    function() { doc = docDAO.getUserJoinedDoc('bwahuser'); },
-    'Threw up on a valid uid.'
-  );
-
-  test.strictEqual(
-    doc.id,
-    'one',
-    'Did not return the proper docID.'
-  );
-
-  test.done();
 };
 
 exports['changeDoc()'] = function(test) {
@@ -244,42 +238,47 @@ exports['add()'] = function(test) {
   );
 
   test.throws(
-    function() { docDAO.add('no spaces allowed', 'valid'); },
+    function() { docDAO.add('no spaces allowed', 'valid', function() {}); },
     'Allowed an ID with spaces.'
   );
 
   test.throws(
-    function() { docDAO.add(123, 'valid'); },
+    function() { docDAO.add(123, 'valid', function() {}); },
     'Allowed a non-string ID.'
   );
 
   test.throws(
-    function() { docDAO.add('valid', 1234); },
+    function() { docDAO.add('valid', 1234, function() {}); },
     'Allowed a non-string gid.'
   );
 
   test.throws(
-    function() { docDAO.add('valid', 'no spaces allowed'); },
+    function() { docDAO.add('valid', 'no spaces allowed', function() {}); },
     'Allowed a GID with spaces.'
   );
 
-  var newDoc;
+  test.throws(
+    function() { docDAO.add('valid123', 'valid123', 123); },
+    'Allowed a non-function callback.'
+  );
 
   test.doesNotThrow(
-    function() { newDoc = docDAO.add('123456', '654321'); },
+    function() {
+      docDAO.add('123456', '654321', function(err, newDoc) {
+        test.deepEqual(
+          newDoc,
+          {
+            id: '123456',
+            gid: '654321',
+            seq: null,
+            text: ''
+          },
+          'The created document was not what we were expecting.'
+        );
+
+        test.done();
+      });
+    },
     'Threw up on valid input.'
   );
-
-  test.deepEqual(
-    newDoc,
-    {
-      id: '123456',
-      gid: '654321',
-      seq: null,
-      text: ''
-    },
-    'The created document was not what we were expecting.'
-  );
-
-  test.done();
 };

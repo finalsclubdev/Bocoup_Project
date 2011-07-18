@@ -13,6 +13,10 @@ var users = {};
 
 var docs = {};
 
+function makeDocStatesMapKey(gid, docID) {
+  return gid + '/' + docID;
+}
+
 /**
  * Creates a new document in a group with a provided ID and returns it.
  *
@@ -85,6 +89,7 @@ exports.getByGID = function(gid) {
 
   var res = {};
 
+//TODO use couch instead of docs var here
   for(var docID in docs) {
     if(docs[docID].gid === gid) {
       docs[docID].id = docID;
@@ -125,7 +130,7 @@ exports.join = function(uid, docID, gid, callback) {
     throw 'Invalid callback.';
   }
 
-  var mapID = gid + '/' + docID;
+  var mapID = makeDocStatesMapKey(gid, docID);
 
   var newDocState = true;
 
@@ -133,7 +138,7 @@ exports.join = function(uid, docID, gid, callback) {
     if(err) {
       callback(null, err);
     }
-    else {
+    else if(doc) {
       var newDocState = false;
 
       if(!docStates[mapID]) {
@@ -145,6 +150,9 @@ exports.join = function(uid, docID, gid, callback) {
       docStates[mapID].joinUser(uid);
 
       callback(((newDocState) ? docStates[mapID] : null), null);
+    }
+    else {
+      callback(null, 'Could not find that document.');
     }
   });
 };
@@ -168,18 +176,22 @@ exports.part = function(uid, docID) {
 /**
  * Updates the state of the document by passing the user's new cursor position.
  *
+ * @param {String} gid The document's group ID.
+ *
  * @param {String} docID The document's ID.
  *
  * @param {String} uid The user's ID.
  *
  * @param {Number} pos The user's cursor's position.
  */
-exports.updateCursor = function(docID, uid, pos) {
-  if(!docStates[docID]) {
+exports.updateCursor = function(gid, docID, uid, pos) {
+  var mapID = makeDocStatesMapKey(gid, docID);
+
+  if(!docStates[mapID]) {
     throw 'No one has joined that document yet, so why are you sending me cursor positions?';
   }
 
-  docStates[docID].updateCursor(uid, pos);
+  docStates[mapID].updateCursor(uid, pos);
 };
 
 exports.changeDoc = function(docID, op, uid, pos, val, asOf) {
@@ -205,12 +217,14 @@ exports.changeDoc = function(docID, op, uid, pos, val, asOf) {
   docStates[docID].execCommand(cmd);
 };
 
-exports.getJoinedUsers = function(docID) {
-  if(!docStates[docID]) {
+exports.getJoinedUsers = function(gid, docID) {
+  var mapID = makeDocStatesMapKey(gid, docID);
+
+  if(!docStates[mapID]) {
     throw 'No one has joined that document yet, so why are you sending me cursor positions?';
   }
 
-  return docStates[docID].getUsers();
+  return docStates[mapID].getUsers();
 };
 
 /**
@@ -227,11 +241,5 @@ exports.getUserJoinedDoc = function(uid) {
     throw 'Invalid user id.';
   }
 
-  var docID = users[uid];
-
-  if(!docID) {
-    return null;
-  }
-
-  return docs[docID] || null;
+  return (users[uid]) ? users[uid].substr(users[uid].indexOf('/') + 1) : null;
 };
