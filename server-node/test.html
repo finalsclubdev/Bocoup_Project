@@ -5,55 +5,12 @@
     <script src="../client/js/libs/socket.io.js"></script>
     <script src="../client/js/colab.js"></script>
     <script>
-    colab.addUserObserver('loggedIn', function(currUser) {
-      console.log('we are now logged in', currUser);
-
-      colab.getGroups();
-
-      colab.joinDoc('one');
-    });
-
-    colab.addGroupObserver('getGroups', function(groups) {
-      console.log('observer got a list of groups', groups);
-
-      //make sure we can retrieve each of the groups individually, by id
-      for(var id in groups) {
-        colab.getGroup(id);
-      }
-    });
-
-    colab.addGroupObserver('get', function(group) {
-      console.log('observer got a group', group);
-
-      if(group.docs.one) {
-        colab.joinDoc(group.docs.one.id);
-      }
-    });
-
-    colab.addDocObserver('cursor', function(data) {
-      console.log('cursor update', data);
-    });
-
-    var bwah = function (data) {
-      console.log('bwah');
-    }
-
-    colab.addGroupObserver('getGroups', bwah);
-
-    colab.addDocObserver('change', function(data) {
-      console.log('change', data);
-    });
-
-    colab.addDocObserver('join', function(docID) {
-      console.log('just joined docID', docID);
-      colab.updateCursor(3);
-      colab.updateCursor(5);
-
-      colab.changeDoc('INSERT', 0, 'a');
-      colab.changeDoc('INSERT', 1, 'b');
+    colab.addDocObserver('get', function(doc) {
+      console.log('just got a new doc', doc);
     });
 
     colab.login(prompt('login'));
+    colab.getDocument('some-doc-slug', 'grpID-A');
     </script>
   </head>
 </html>
