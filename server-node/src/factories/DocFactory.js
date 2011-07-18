@@ -1,12 +1,18 @@
 var OperationEnum = require('../enums/OperationEnum.js');
+var docValidator = require('../validators/DocValidator.js');
+var groupValidator = require('../validators/GroupValidator.js');
 
 exports.makeDocState = function(doc) {
   if(typeof doc != 'object') {
     throw 'You failed to provide a document object.';
   }
 
-  if(!doc.id || typeof doc.id != 'string') {
+  if(!docValidator.isValidID(doc.id)) {
     throw 'That doc object has an invalid id.';
+  }
+
+  if(!groupValidator.isValidID(doc.gid)) {
+    throw 'That does object has an invalid gid.';
   }
   
   return (function(doc) {
@@ -19,7 +25,7 @@ exports.makeDocState = function(doc) {
       if(typeof uid == 'string' && uid && typeof pos == 'number' && pos >= 0) {
         for(var i in cursorObservers) {
           if(cursorObservers.hasOwnProperty(i)) {
-            cursorObservers[i](doc.id, uid, pos);
+            cursorObservers[i](doc.gid, doc.id, uid, pos);
           }
         }
       }

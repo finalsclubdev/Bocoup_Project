@@ -11,7 +11,7 @@ exports["makeDocState() input validation"] = function(test) {
   );
 
   test.equal(
-    typeof docFactory.makeDocState({ id: 'bwah' }),
+    typeof docFactory.makeDocState({ id: 'did123123', gid: 'gid123123' }),
     'object',
     'Did not return a state object.'
   );
@@ -35,9 +35,9 @@ exports["makeDocState() input validation"] = function(test) {
 };
 
 exports["makeDocState() output's functions"] = function(test) {
-  test.expect(30);
+  test.expect(32);
 
-  var state = docFactory.makeDocState({ id: 'bwah' });
+  var state = docFactory.makeDocState({ id: 'did123123', gid: 'gid123123' });
 
   // Make sure the base functions exist.
   test.equal(
@@ -93,8 +93,9 @@ exports["makeDocState() output's functions"] = function(test) {
   );
 
   // Join a user, so everything after this should work with that user.
-  var onInitialCursorUpdate = function(docID, uid, pos) {
-    test.equal(docID, 'bwah', 'Incorrect docID.');
+  var onInitialCursorUpdate = function(gid, docID, uid, pos) {
+    test.equal(gid, 'gid123123', 'Incorrect gid.');
+    test.equal(docID, 'did123123', 'Incorrect docID.');
     test.equal(uid, 'bwah', 'Incorrect UID reported.');
     test.equal(pos, 0, 'Incorrect initial cursor position reported.');
   };
@@ -125,8 +126,9 @@ exports["makeDocState() output's functions"] = function(test) {
     'Was not able to remove the onInitialCursorUpdate() observer.'
   );
 
-  var onCursorUpdate = function(docID, uid, pos) {
-    test.equal(docID, 'bwah', 'Incorrect docID reported.');
+  var onCursorUpdate = function(gid, docID, uid, pos) {
+    test.equal(gid, 'gid123123', 'Incorrect gid reported.');
+    test.equal(docID, 'did123123', 'Incorrect docID reported.');
     test.equal(uid, 'bwah', 'Incorrect UID reported.');
     test.equal(pos, 32, 'Incorrect cursor position reported.');
   };
@@ -208,7 +210,7 @@ exports['makeInsertCommand()'] = function(test) {
 };
 
 exports['OT'] = function(test) {
-  var state = docFactory.makeDocState({ id: 'someDoc' });
+  var state = docFactory.makeDocState({ id: 'someDoc', gid: 'someGroup' });
 
   state.addChangeObserver(function(data) {
     if(typeof data.command.asOf == 'number') {
