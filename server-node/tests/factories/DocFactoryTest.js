@@ -253,17 +253,59 @@ exports['OT'] = function(test) {
    */
   state.joinUser('lagger');
 
-  state.addChangeObserver(function(data) {
+  var laggerCallback = function(data) {
     if(data.command.seq < 9) {
       test.strictEqual(data.toUser, 'lagger', 'toUser not set properly.');
     }
     else {
       test.strictEqual(data.toUser, undefined, 'toUser set when it should not be.');
     }
-  });
+  };
+
+  state.addChangeObserver(laggerCallback);
 
   //this triggers both (2) observer callbacks
   state.execCommand(docFactory.makeInsertCommand('lagger', 0, 'l', 0));
+
+  test.strictEqual(state.getDocText(), 'lbwahh');
+
+  test.ok(state.removeChangeObserver(laggerCallback), 'Could not remove the callback.');
+
+  /*
+   * Tell the state to return the doc object, thereby flushing the command
+   * buffer and updating its internal doc state. Then send it more commands and
+   * make sure they get expected seq numbers, etc. Then get the doc's text and
+   * make sure it's as expected.
+   */
+  var doc = state.flushBuffer();
+
+  test.deepEqual(
+    doc,
+    {
+      id: 'someDoc',
+      gid: 'someGroup',
+      text: 'lbwahh',
+      seq: 9
+    },
+    'Updated internal doc state is not as expected.'
+  );
+
+  state.execCommand(docFactory.makeInsertCommand('uid', 7, '!', 9));
+  test.strictEqual(state.getDocText(), 'lbwahh!', 'Doc not updated properly.');
+
+  state.execCommand(docFactory.makeDeleteCommand('uid', 1, 1, 10));
+  test.strictEqual(state.getDocText(), 'bwahh!', 'Doc not updated properly.');
+
+  /*
+   * Have a lagging user send a command with a seq that is earlier than the
+   * ones we have in the buffer. We expect they will be told to pull the entire
+   * doc as a result, their command getting dropped on the floor.
+   */
+  test.deepEqual(
+    state.execCommand(docFactory.makeInsertCommand('lagger', 0, 'a', 8)),
+    doc,
+    'Did not get the internal doc state.'
+  );
 
   test.done();  
 };
