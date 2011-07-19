@@ -63,7 +63,7 @@ if ( !Function.prototype.bind ) {
 
   ColabEditor.prototype.join = function( options ) {
     colab.addDocObserver("join", onJoin.bind(this));
-    colab.joinDoc(this.doc.id);
+    colab.joinDoc(this.doc.gid, this.doc.id);
   };
 
   // Converts ACE's two dimensional text range objects (row & column)

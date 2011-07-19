@@ -75,9 +75,15 @@ var groupRoutes = io.of('/group')
           }
           else {
             group.id = id;
-            group.docs = docDAO.getByGID(id);
-
-            socket.emit('get', group);
+            docDAO.getByGID(group.id, function(err, docs) {
+              if(err) {
+                socket.emit('err', err);
+              }
+              else {
+                group.docs = docs;
+                socket.emit('get', group);
+              }
+            });
           }
         });
       }

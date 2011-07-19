@@ -69,21 +69,25 @@
               // automatically create it by going to #{groupid}
               return Backbone.history.navigate(groupid, true);
             } 
-            doc = group.docs.get(docid);
-            if ( !doc ) {
-              return group.docs.create({
+            $.when(group.docs.length || group.docs.fetch()).always(function() {
+
+              doc = group.docs.get(docid);
+              if ( !doc ) {
+                group.docs.create({
                   gid: group.id,
                   name: docid
                 },{
-                success: function(d) {
-                  FC.main.transition( new DocView({doc: d}) );
-                },
-                error: function( excp ) {
-                  console.log("Document creation failed", excp);
-                }
-              })
-            }
-            FC.main.transition( new DocView({doc: doc}) );
+                  success: function(d) {
+                    FC.main.transition( new DocView({doc: d}) );
+                  },
+                  error: function( excp ) {
+                    console.log("Document creation failed", excp);
+                  }
+                })
+              } else {
+                FC.main.transition( new DocView({doc: doc}) );
+              }
+            });
           }
         }),
 
@@ -123,7 +127,7 @@
           },
           initialize: function() {
             _.bindAll(this);
-            this.docs = new DocCollection( this.get("docs") );
+            this.docs = new DocCollection( this.get("docs"), {group: this});
           },
           change: function(e) {
             this.docs.reset( _.map(this.get("docs"), function(doc, d) {
@@ -237,7 +241,44 @@
         }),
 
         DocCollection = Backbone.Collection.extend({
-          model: Doc
+          model: Doc,
+          initialize: function(models,options) {
+            _.bindAll(this);
+            this.group = options.group;
+          },
+          sync: function(method, docs, options) {
+            var dfd = jQuery.Deferred().always(function(resp) {
+              options.success.call(docs, resp);
+            });
+            function onRead( d ) {
+              d = _.map( d, function( doc ) {
+                return doc;
+              });
+              dfd.resolve( d );
+              colab.removeDocObserver( onRead );
+            }
+
+            function onCreate( d ) {
+              dfd.resolve( d );
+              colab.removeDocObserver( onCreate );
+            }
+
+            switch( method ) {
+              case "read":
+                colab.addDocObserver("getByGID", onRead);
+                console.log("fetching documents by GID "+docs.group.get("id"));
+                colab.getDocumentsByGID( docs.group.get("id") );
+                break;
+              case "create":
+                break;
+              case "update":
+                break;
+              case "delete":
+                break;
+            }
+
+            return dfd;
+          }
         }),
 
         HeaderView = Backbone.View.extend({
@@ -330,7 +371,6 @@
               this.options.group.toJSON(),
               {docs: this.options.group.docs.toJSON()}
             );
-            console.log(data);
             $(this.el).html(this.template(data));
             return this;
           }
@@ -433,6 +473,16 @@
               FC.connected.reject({msg: "Socket connection timed out!"});
             },2500);
 
+            colab.onError = function( excp ) {
+              console.log(excp);
+              switch ( excp ) {
+                case "That name is already in use.":
+                  FC.users.at(0) && FC.users.at(0).destroy();
+                  window.location.hash = "login";
+                  FC.connected.resolve({msg: excp});
+              }
+            };
+
             // Set up observers for socket connection and login
             colab.addUserObserver('connected', function(currUser) {
               var user = FC.users.at(0);
@@ -459,6 +509,13 @@
 
               console.log(FC.users.at(0).get("uid") + " logged in");
               FC.connected.resolve({msg: "Connected", user: FC.users.at(0)});
+
+              // Once successfully logged in, we have to make sure to log out
+              // if the user unloeads the window, otherwise we won't be able to refresh
+              window.onbeforeunload = function(e) {
+                colab.partDoc();
+                colab.logout();
+              };
             });
 
           },
