@@ -459,6 +459,12 @@
 
               console.log(FC.users.at(0).get("uid") + " logged in");
               FC.connected.resolve({msg: "Connected", user: FC.users.at(0)});
+
+              // Once successfully logged in, we have to make sure to log out
+              // if the user unloeads the window, otherwise we won't be able to refresh
+              $(window).bind("beforeunload", function(e) {
+                colab.logout();
+              });
             });
 
           },
