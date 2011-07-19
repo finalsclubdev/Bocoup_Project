@@ -235,26 +235,26 @@ exports.makeDocState = function(doc) {
       },
 
       getDocText: function() {
-        var doc = '';
+        var text = doc.text;
 
         for(var i in commandBuffer) {
           if(commandBuffer.hasOwnProperty(i)) {
             switch(commandBuffer[i].op) {
               case OperationEnum.INSERT:
-                doc = doc.substr(0, commandBuffer[i].pos) +
+                text = text.substr(0, commandBuffer[i].pos) +
                         commandBuffer[i].val +
-                        doc.substr(commandBuffer[i].pos);
+                        text.substr(commandBuffer[i].pos);
                 break;
 
               case OperationEnum.DELETE:
-                doc = doc.substr(0, commandBuffer[i].pos - commandBuffer[i].val) +
-                        doc.substr(commandBuffer[i].pos);
+                text = text.substr(0, commandBuffer[i].pos - commandBuffer[i].val) +
+                        text.substr(commandBuffer[i].pos);
                 break;
             }
           }
         }
 
-        return doc;
+        return text;
       },
 
       getUsers: function() {
