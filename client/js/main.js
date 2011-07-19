@@ -473,6 +473,7 @@
               // Once successfully logged in, we have to make sure to log out
               // if the user unloeads the window, otherwise we won't be able to refresh
               window.onbeforeunload = function(e) {
+                colab.partDoc();
                 colab.logout();
               };
             });
