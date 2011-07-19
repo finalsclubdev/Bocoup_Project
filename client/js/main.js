@@ -433,6 +433,16 @@
               FC.connected.reject({msg: "Socket connection timed out!"});
             },2500);
 
+            colab.onError = function( excp ) {
+              console.log(excp);
+              switch ( excp ) {
+                case "That name is already in use.":
+                  FC.users.at(0) && FC.users.at(0).destroy();
+                  window.location.hash = "login";
+                  FC.connected.resolve({msg: excp});
+              }
+            };
+
             // Set up observers for socket connection and login
             colab.addUserObserver('connected', function(currUser) {
               var user = FC.users.at(0);
