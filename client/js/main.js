@@ -251,6 +251,9 @@
               options.success.call(docs, resp);
             });
             function onRead( d ) {
+              d = _.map( d, function( doc ) {
+                return doc;
+              });
               dfd.resolve( d );
               colab.removeDocObserver( onRead );
             }
