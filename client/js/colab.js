@@ -117,9 +117,9 @@ var colab = (function(io) {
     if(!currDoc.id) {
       console.warn('Got a change event when not joined to a document.');
     }
-    else if(command.asOf == currDoc.lastSeenSeq) {
+    else if(command.asOf == currDoc.seq) {
       console.debug('setting lastSeenSeq to '+command.seq);
-      currDoc.lastSeenSeq = command.seq;
+      currDoc.seq = command.seq;
 
       //The editor already has its own edits.
       if(command.uid != currUser.id) {
@@ -267,12 +267,13 @@ var colab = (function(io) {
      */
     changeDoc: function(op, pos, val) {
       docSock.emit('change', {
-        docID: currDoc.id,
+        id: currDoc.id,
+        gid: currDoc.gid,
         op: op,
         uid: currUser.id,
         pos: pos,
         val: val,
-        asOf: currDoc.lastSeenSeq || null
+        asOf: (currDoc.seq >= 0) ? currDoc.seq : null
       });
     },
 

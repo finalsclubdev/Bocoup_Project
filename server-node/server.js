@@ -144,7 +144,7 @@ var docRoutes = io.of('/doc')
                 socket.namespace.sockets[userDAO.get(data.toUser).sessionID].emit('change', data.command);
               }
               else {
-                var users = docDAO.getJoinedUsers(data.docID);
+                var users = docDAO.getJoinedUsers(data.gid, data.docID);
 
                 for(var i in users) {
                   if(users.hasOwnProperty(i)) {
@@ -175,7 +175,15 @@ var docRoutes = io.of('/doc')
 
     socket.on('change', function(data) {
       try {
-        docDAO.changeDoc(data.docID, data.op, data.uid, data.pos, data.val, data.asOf);
+        docDAO.changeDoc(
+          data.gid,
+          data.id,
+          data.op,
+          data.uid,
+          data.pos,
+          data.val,
+          data.asOf
+        );
       }
       catch(e) {
         socket.emit('err', e);

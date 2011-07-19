@@ -35,6 +35,7 @@ exports.makeDocState = function(doc) {
       if(typeof command == 'object') {
         var data = {
           docID: doc.id,
+          gid: doc.gid,
           command: command
         };
 

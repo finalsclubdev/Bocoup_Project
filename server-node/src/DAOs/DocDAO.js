@@ -188,9 +188,11 @@ exports.updateCursor = function(gid, docID, uid, pos) {
   docStates[mapID].updateCursor(uid, pos);
 };
 
-exports.changeDoc = function(docID, op, uid, pos, val, asOf) {
-  if(!docStates[docID]) {
-    throw 'No one has joined that document yet, so why are you sending me cursor positions?';
+exports.changeDoc = function(gid, docID, op, uid, pos, val, asOf) {
+  var mapID = makeDocStatesMapKey(gid, docID);
+
+  if(!docStates[mapID]) {
+    throw 'No one has joined that document yet, so why are you sending me changes?';
   }
 
   var cmd;
@@ -208,14 +210,18 @@ exports.changeDoc = function(docID, op, uid, pos, val, asOf) {
       throw 'Unsupported document operation: '+ op +'.';
   }
 
-  docStates[docID].execCommand(cmd);
+  var result = docStates[mapID].execCommand(cmd);
+
+  if(result.id && result.gid) {
+    return result;
+  }
 };
 
 exports.getJoinedUsers = function(gid, docID) {
   var mapID = makeDocStatesMapKey(gid, docID);
 
   if(!docStates[mapID]) {
-    throw 'No one has joined that document yet, so why are you sending me cursor positions?';
+    throw 'No one has joined that document yet, so why are you asking for joined users?'; 
   }
 
   return docStates[mapID].getUsers();
