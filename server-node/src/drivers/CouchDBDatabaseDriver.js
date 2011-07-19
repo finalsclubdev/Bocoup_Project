@@ -132,3 +132,35 @@ exports.getGroups = function(callback) {
     callback(err, res);
   });
 };
+
+exports.getDocsByGID = function(gid, callback) {
+  if(!groupValidator.isValidID(gid)) {
+    throw 'Invalid gid.';
+  }
+
+  if(typeof callback !== 'function') {
+    throw 'Invalid callback.';
+  }
+
+  this.db.view('app/docByGID', { include_docs: true, key: gid }, function(err, res) {
+    if(!err) {
+      var docs = {};
+
+      for(var i in res.rows) {
+        if(res.rows.hasOwnProperty(i)) {
+          var id = res.rows[i].id.substr(res.rows[i].id.indexOf('/') + 1);
+
+          docs[id] = res.rows[i].doc;
+          docs[id].id = id;
+
+          delete docs[id]._id;
+          delete docs[id]._rev;
+        }
+      }
+
+      res = docs;
+    }
+
+    callback(err, res);
+  });
+};

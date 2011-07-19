@@ -80,24 +80,18 @@ exports.get = function(id, gid, callback) {
  *
  * @param {String} gid The group ID.
  *
- * @returns {Object[]} An array of document objects, which include their ID.
+ * @param {Function} callback The callback: fn(err, docs)
  */
-exports.getByGID = function(gid) {
+exports.getByGID = function(gid, callback) {
   if(!gid || typeof gid != 'string') {
     throw 'Invalid group ID.';
   }
 
-  var res = {};
-
-//TODO use couch instead of docs var here
-  for(var docID in docs) {
-    if(docs[docID].gid === gid) {
-      docs[docID].id = docID;
-      res[docID] = docs[docID];
-    }
+  if(typeof callback !== 'function') {
+    throw 'Invalid callback.';
   }
 
-  return res;
+  dbDriver.getDocsByGID(gid, callback);
 };
 
 /**

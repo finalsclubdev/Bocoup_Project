@@ -63,21 +63,30 @@ exports['getByGID()'] = function(test) {
     'Did not throw on a true, non-string GID.'
   );
 
-  var docs = docDAO.getByGID('grpID-A');
-
-  test.equal(
-    typeof docs,
-    'object',
-    'Did not get an object of docs back.'
+  test.throws(
+    function() { docDAO.getByGID('123123', true); },
+    'Did not throw on an invalid callback.'
   );
 
-  for(var i in docs) {
-    test.equal(typeof docs[i], 'object', 'Document is not an object.');
+  docDAO.getByGID('grpID-A', function(err, docs) {
+    test.equal(err, null, 'There was an error.');
 
-    test.strictEqual(docs[i].id, i, 'IDs do not match.');
-  }
+    test.equal(
+      typeof docs,
+      'object',
+      'Did not get an object of docs back.'
+    );
 
-  test.done();
+    for(var i in docs) {
+      if(docs.hasOwnProperty(i)) {
+        test.equal(typeof docs[i], 'object', 'Document is not an object.');
+
+        test.strictEqual(docs[i].id, i, 'IDs do not match.');
+      }
+    }
+
+    test.done();
+  });
 };
 
 exports['join()'] = function(test) {
