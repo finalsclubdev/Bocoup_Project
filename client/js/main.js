@@ -248,11 +248,10 @@
           },
           sync: function(method, docs, options) {
             var dfd = jQuery.Deferred().always(function(resp) {
-              options.success.call(collection, resp);
+              options.success.call(docs, resp);
             });
             function onRead( d ) {
               dfd.resolve( d );
-              console.log("RESOLVED", d);
               colab.removeDocObserver( onRead );
             }
 
