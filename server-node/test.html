@@ -19,8 +19,12 @@
       colab.joinDoc(doc.gid, doc.id);
     });
 
+    colab.addGroupObserver('getGroups', function(data) {
+      console.log('groups', data);
+    });
+
     colab.login(prompt('login'));
-    colab.getDocument('some-doc-slug', 'grpID-A');
+    colab.getGroups();
     </script>
   </head>
 </html>

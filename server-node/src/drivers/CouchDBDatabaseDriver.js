@@ -104,3 +104,31 @@ exports.getDoc = function(id, gid, callback) {
     callback(err, doc);
   });
 };
+
+exports.getGroups = function(callback) {
+  if(typeof callback !== 'function') {
+    throw 'Invalid callback.';
+  }
+
+  this.db.view('app/groups', { include_docs: true }, function(err, res) {
+    if(!err) {
+      var groups = {};
+
+      for(var i in res.rows) {
+        if(res.rows.hasOwnProperty(i)) {
+          //removes the 'group:' prefix
+          var id = res.rows[i].id.substr(6);
+
+          groups[id] = res.rows[i].doc;
+
+          delete groups[id]._id;
+          delete groups[id]._rev;
+        }
+      }
+
+      res = groups;
+    }
+
+    callback(err, res);
+  });
+};

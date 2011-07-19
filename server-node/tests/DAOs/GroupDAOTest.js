@@ -9,7 +9,7 @@ exports['instantiation'] = function(test) {
 };
 
 exports['getList()'] = function(test) {
-  test.expect(6);
+  test.expect(2);
 
   test.equal(
     typeof groupDAO.getList,
@@ -17,27 +17,10 @@ exports['getList()'] = function(test) {
     'getList() is not a function.'
   );
 
-  var list = groupDAO.getList();
-
-  test.equal(
-    typeof list,
-    'object',
-    'Lists are not objects when they should be.'
+  test.doesNotThrow(
+    function() { groupDAO.getList(function(err, list) { }); },
+    'Threw on valid input.'
   );
-
-  for(var i in list) {
-    test.equal(
-      typeof list[i],
-      'object',
-      'A list item does not have the write data type.'
-    );
-
-    test.equal(
-      typeof list[i].name,
-      'string',
-      'A list item\'s name is not a string.'
-    );
-  }
 
   test.done();
 };

@@ -53,7 +53,14 @@ var groupRoutes = io.of('/group')
   .on('connection', function(socket) {
     socket.on('getGroups', function() {
       try {
-        socket.json.emit('getGroups', groupDAO.getList());
+        groupDAO.getList(function(err, data) {
+          if(err) {
+            socket.emit('err', err);
+          }
+          else {
+            socket.emit('getGroups', data);
+          }
+        });
       }
       catch(e) {
         socket.emit('err', e);
