@@ -19,8 +19,18 @@
       colab.joinDoc(doc.gid, doc.id);
     });
 
+    colab.addDocObserver('getByGID', function(docs) {
+      console.log('docs', docs);
+    });
+
     colab.addGroupObserver('getGroups', function(data) {
       console.log('groups', data);
+
+      for(var i in data) {
+        if(data.hasOwnProperty(i)) {
+          colab.getDocumentsByGID(i);
+        }
+      }
     });
 
     colab.login(prompt('login'));

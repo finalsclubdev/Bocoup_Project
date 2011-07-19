@@ -213,4 +213,20 @@ var docRoutes = io.of('/doc')
         socket.emit('err', e);
       }
     });
+
+    socket.on('getByGID', function(gid) {
+      try {
+        docDAO.getByGID(gid, function(err, docs) {
+          if(err) {
+            socket.emit('err', err);
+          }
+          else {
+            socket.emit('getByGID', docs);
+          }
+        });
+      }
+      catch(e) {
+        socket.emit('err', e);
+      }
+    });
   });

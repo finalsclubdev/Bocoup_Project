@@ -137,6 +137,10 @@ var colab = (function(io) {
     observers.notify(observers.docEvents, 'get', doc);
   });
 
+  docSock.on('getByGID', function(docs) {
+    observers.notify(observers.docEvents, 'getByGID', docs);
+  });
+
   //Our API, which we can call internally as well.
   var api = {
     //Add an observer to the group events.
@@ -300,10 +304,19 @@ var colab = (function(io) {
      *
      * @param {String} id The document's ID.
      *
-     * @param {String} gid THe group's ID that this document belongs to.
+     * @param {String} gid The group's ID that this document belongs to.
      */
     getDocument: function(id, gid) {
       docSock.emit('get', { id: id, gid: gid });
+    },
+
+    /**
+     * Returns documents that belong to a particular group.
+     *
+     * @param {String} gid The group's ID.
+     */
+    getDocumentsByGID: function(gid) {
+      docSock.emit('getByGID', gid);
     },
 
     /*
