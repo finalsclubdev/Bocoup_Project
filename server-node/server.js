@@ -181,15 +181,22 @@ var docRoutes = io.of('/doc')
 
     socket.on('change', function(data) {
       try {
-        docDAO.changeDoc(
-          data.gid,
-          data.id,
-          data.op,
-          data.uid,
-          data.pos,
-          data.val,
-          data.asOf
-        );
+        var doc = docDAO.changeDoc(
+                            data.gid,
+                            data.id,
+                            data.op,
+                            data.uid,
+                            data.pos,
+                            data.val,
+                            data.asOf
+                          );
+
+        if(doc) {
+          socket.emit('conflict', {
+            doc: doc,
+            command: data
+          });
+        }
       }
       catch(e) {
         socket.emit('err', e);

@@ -5,18 +5,33 @@
     <script src="../client/js/libs/socket.io.js"></script>
     <script src="../client/js/colab.js"></script>
     <script>
+    var i = 0;
+
+    function sendInsert() {
+      if(i < 30) {
+        colab.changeDoc('INSERT', 0, '!');
+        setTimeout('sendInsert()', 10);
+
+        i++;
+      }
+    }
+
+    colab.addUserObserver('loggedIn', function() {
+      colab.joinDoc('grpID-A', 'some-doc-slug');
+    });
+
     colab.addDocObserver('cursor', function(d) {
       console.log('cursor', d);
     });
 
     colab.addDocObserver('join', function(id) {
       console.log('just joined', id);
+
+      sendInsert();
     });
 
     colab.addDocObserver('get', function(doc) {
       console.log('just got a new doc', doc);
-
-      colab.joinDoc(doc.gid, doc.id);
     });
 
     colab.addDocObserver('getByGID', function(docs) {
@@ -25,16 +40,9 @@
 
     colab.addGroupObserver('getGroups', function(data) {
       console.log('groups', data);
-
-      for(var i in data) {
-        if(data.hasOwnProperty(i)) {
-          colab.getDocumentsByGID(i);
-        }
-      }
     });
 
     colab.login(prompt('login'));
-    colab.getGroups();
     </script>
   </head>
 </html>

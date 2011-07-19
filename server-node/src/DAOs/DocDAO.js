@@ -138,6 +138,14 @@ exports.join = function(uid, docID, gid, callback) {
       if(!docStates[mapID]) {
         newDocState = true;
         docStates[mapID] = docFactory.makeDocState(doc);
+
+        docStates[mapID].addChangeObserver(function(data) {
+          if(data.command.seq > 0 && data.command.seq % 20 === 0) {
+            var docToPersist = docStates[mapID].flushBuffer();
+            console.log('docToPersist', docToPersist);
+            //TODO persist the doc
+          }
+        });
       }
 
       users[uid] = mapID;
@@ -188,6 +196,29 @@ exports.updateCursor = function(gid, docID, uid, pos) {
   docStates[mapID].updateCursor(uid, pos);
 };
 
+/**
+ * Submits a change to a document.
+ *
+ * @param {String} gid The document's group's ID.
+ *
+ * @param {String} docID The document's ID.
+ *
+ * @param {String} op The operation (from OperationEnum).
+ *
+ * @param {String} uid The user's ID.
+ *
+ * @param {Number} pos The string position to do the operation at.
+ *
+ * @param {String|Number} val The value for the operation. A letter, or
+ * letters, for INSERT or the number of characters to remove on DELETE.
+ *
+ * @param {Number} asOf The last seen sequence number.
+ *
+ * @returns {Object} If the change was behind the buffer, then the current
+ * state of the document is returned. It needs to be sent to the client so they
+ * can update their state and resend the command. Doesn't return anything if
+ * the command executed.
+ */
 exports.changeDoc = function(gid, docID, op, uid, pos, val, asOf) {
   var mapID = makeDocStatesMapKey(gid, docID);
 

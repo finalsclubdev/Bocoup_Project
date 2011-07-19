@@ -96,8 +96,7 @@ var colab = (function(io) {
   docSock.on('join', function(data) {
     currDoc = {
       id: data.id,
-      gid: data.gid,
-      lastSeenSeq: null
+      gid: data.gid
     };
 
     observers.notify(observers.docEvents, 'join', data);
@@ -118,7 +117,7 @@ var colab = (function(io) {
       console.warn('Got a change event when not joined to a document.');
     }
     else if(command.asOf == currDoc.seq) {
-      console.debug('setting lastSeenSeq to '+command.seq);
+      console.debug('setting seq to '+command.seq);
       currDoc.seq = command.seq;
 
       //The editor already has its own edits.
@@ -128,8 +127,14 @@ var colab = (function(io) {
     }
   });
 
+  docSock.on('conflict', function(data) {
+    console.log('a conflicted change was rejected, doc state updated', data.command);
+
+    currDoc = data.doc;
+    observers.notify(observers.docEvents, 'get', data.doc);
+  });
+
   docSock.on('add', function(newDoc) {
-    console.log(newDoc);
     observers.notify(observers.docEvents, 'add', newDoc);
   });
 

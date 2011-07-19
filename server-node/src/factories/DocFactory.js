@@ -232,9 +232,12 @@ exports.makeDocState = function(doc) {
         var tailCmd = getTailCommand();
 
         if(
-          (doc.seq >= 0 && command.asOf === null) ||
-          (tailCmd && command.asOf < tailCmd.seq) ||
-          (!headCmd && command.asOf != doc.seq)
+          doc.seq !== null &&
+          (
+            (doc.seq >= 0 && command.asOf === null) ||
+            (tailCmd && command.asOf < tailCmd.seq) ||
+            (!headCmd && command.asOf != doc.seq)
+          )
         ) {
           /*
            * There was a flush while the client missed some change events
