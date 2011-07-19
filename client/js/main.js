@@ -262,7 +262,7 @@
 
             switch( method ) {
               case "read":
-                colab.addDocObserver("get", onRead);
+                colab.addDocObserver("getByGID", onRead);
                 console.log("fetching documents by GID "+docs.group.get("id"));
                 colab.getDocumentsByGID( docs.group.get("id") );
                 break;
