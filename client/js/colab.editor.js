@@ -140,6 +140,7 @@ if ( !Function.prototype.bind ) {
         console.log(event.data);
         break;
       case "removeText":
+      case "removeLines":
         operation = "DELETE";
         value = range.end - range.start;
         break;
