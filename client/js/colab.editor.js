@@ -36,16 +36,18 @@ if ( !Function.prototype.bind ) {
     this.doc = doc;
     // Create an ACE editor
     this.ace = ace.edit( elem );
-    // Lock  our editor instance until we join the document
+    // Lock our editor instance until we join the document
     this.lock();
     this.join();
   };
 
   ColabEditor.prototype.lock = function() {
+    this.locked = true;
     this.ace.setReadOnly( true );
   };
 
   ColabEditor.prototype.unlock = function() {
+    this.locked = false;
     this.ace.setReadOnly( false );
   };
 
@@ -97,6 +99,9 @@ if ( !Function.prototype.bind ) {
   }
 
   ColabEditor.prototype.aceChange = function( event ) {
+    if (this.locked) {
+      return;
+    }
     var operation,
         value,
         action = event.data.action,
@@ -137,6 +142,7 @@ if ( !Function.prototype.bind ) {
   };
 
   ColabEditor.prototype.remoteChange = function( msg ) {
+    this.lock();
     var operation = msg.op,
         value = this.ace.session.getValue();
 
@@ -148,6 +154,8 @@ if ( !Function.prototype.bind ) {
         this.ace.session.setValue( value.substr(0, msg.pos - msg.val) + value.substr(msg.pos) );
         break;
     }
+
+    this.unlock();
   };
 
 })();
