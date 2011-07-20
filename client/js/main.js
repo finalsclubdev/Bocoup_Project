@@ -425,7 +425,7 @@
               $t.text("Stop Messages");
               this.msgInterval = setInterval(_.bind(function() {
                 this.editor.remoteChange( this.generateMessage() );
-              },this),250);
+              },this),20);
             }
           },
           render: function() {
