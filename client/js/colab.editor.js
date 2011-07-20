@@ -104,7 +104,7 @@ if ( !Function.prototype.bind ) {
   function expandColabPos( op ) {
     var chars,
         i = 0,
-        columnPos = op.pos,
+        columnPos = op.pos-1,
         lines = this.ace.session.doc.$lines,
         l = lines.length,
         point = { row: 0, column: 0 };
@@ -112,10 +112,11 @@ if ( !Function.prototype.bind ) {
     while(i < l) {
       point.row = i;
       chars = lines[i].length;
+      console.log(lines[i], chars, columnPos);
       if (columnPos <= chars) {
         break;
       }
-      columnPos -= (chars || 1);
+      columnPos -= chars + 1;
       i++;
     }
 
