@@ -85,18 +85,18 @@ if ( !Function.prototype.bind ) {
       // Make sure that a blank line counts
       // But not a line that isn't in the internal $lines array
       line = this.ace.session.doc.$lines[i];
-      l = !line ? 0 : ( line.length || 1 );
+      l = !line ? 1 : ( line.length || 1 );
 
       if (i < startRow) {
-        r.start = r.start + l;
+        r.start += l;
       }
-      r.end = r.end + l;
+      r.end += l;
       i++;
     }
 
     // Add the column of where the edit was made
-    r.start = r.start + range.start.column;
-    r.end = r.end + range.end.column;
+    r.start += range.start.column;
+    r.end += range.end.column;
 
     return r;
   }
@@ -104,6 +104,8 @@ if ( !Function.prototype.bind ) {
   function expandColabPos( op ) {
     var chars,
         i = 0,
+        // colab.js provides the index in the string *after* the edit
+        // ACE needs the range to begin at the index in the string *before* the edit
         columnPos = op.pos-1,
         lines = this.ace.session.doc.$lines,
         l = lines.length,
@@ -137,7 +139,12 @@ if ( !Function.prototype.bind ) {
       case "insertText":
         operation = "INSERT";
         value = event.data.text;
-        console.log(event.data);
+        if (value == "\n") {
+          range.end++;
+        }
+        break;
+      case "insertLines":
+        console.info("INSERTLINES", event.data);
         break;
       case "removeText":
       case "removeLines":
@@ -178,6 +185,10 @@ if ( !Function.prototype.bind ) {
 
     switch ( operation ) {
       case "INSERT":
+        if (chg.val == "\n") {
+          startPos.row +=1;
+          startPos.column = 0;
+        }
         this.ace.session.insert(startPos, chg.val);
         break;
       case "DELETE":
