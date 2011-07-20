@@ -98,6 +98,28 @@ if ( !Function.prototype.bind ) {
     return r;
   }
 
+  function expandColabPos( op ) {
+    var chars,
+        i = 0,
+        columnPos = op.pos,
+        lines = this.ace.session.doc.$lines,
+        l = lines.length,
+        point = { row: 0, column: 0 };
+
+    while(i < l) {
+      point.row = i;
+      chars = lines[i].length;
+      if (columnPos <= chars) {
+        break;
+      }
+      columnPos -= (chars || 1);
+      i++;
+    }
+
+    point.column = columnPos;
+    return point;
+  }
+
   ColabEditor.prototype.aceChange = function( event ) {
     if (this.locked) {
       return;
