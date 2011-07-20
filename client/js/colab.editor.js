@@ -23,6 +23,9 @@ if ( !Function.prototype.bind ) {
 
 (function() {
 
+  // The ACE Range constructor
+  var Range = require("ace/range").Range;
+
   /*
   * The ColabEditor constuctor
   *
@@ -163,17 +166,23 @@ if ( !Function.prototype.bind ) {
     }.bind(this),250);
   };
 
-  ColabEditor.prototype.remoteChange = function( msg ) {
+  ColabEditor.prototype.remoteChange = function( chg ) {
     this.lock();
-    var operation = msg.op,
-        value = this.ace.session.getValue();
+
+    var endPos,
+        range,
+        operation = chg.op,
+        startPos = expandColabPos.call(this,chg);
 
     switch ( operation ) {
       case "INSERT":
-        this.ace.session.setValue( value.substr(0, msg.pos) + msg.val + value.substr(msg.pos) );
+        this.ace.session.insert(startPos, chg.val);
         break;
       case "DELETE":
-        this.ace.session.setValue( value.substr(0, msg.pos - msg.val) + value.substr(msg.pos) );
+        chg.pos += chg.val;
+        endPos = expandColabPos.call(this, chg);
+        range = Range.fromPoints( startPos, endPos );
+        this.ace.session.remove( range );
         break;
     }
 

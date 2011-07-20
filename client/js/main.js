@@ -409,7 +409,7 @@
                 msg.val = tmp.chars.charAt( Math.floor(Math.random() * tmp.chars.length) )["to" + (Math.random() > 0.5 ? "Upper" : "Lower") + "Case"]();
                 break;
               case "DELETE":
-                msg.val = 1;
+                msg.val = Math.ceil(Math.random() * 6);
                 break;
             }
 
