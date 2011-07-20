@@ -218,6 +218,11 @@
               options.success.call(doc, resp);
             });
 
+            function onRead( d ) {
+              dfd.resolve( d );
+              colab.removeDocObserver( onRead );
+            }
+
             function onCreate( d ) {
               dfd.resolve( d );
               colab.removeDocObserver( onCreate );
@@ -225,6 +230,8 @@
 
             switch( method ) {
               case "read":
+                colab.addDocObserver("get", onRead);
+                colab.getDocument( doc.id, doc.get("gid") );
                 break;
               case "create":
                 colab.addDocObserver("add", onCreate);
