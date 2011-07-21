@@ -17,6 +17,18 @@
       return doc.id || doc.text.substring(0,20) + "...";
     });
 
+
+    // Builds the first part of a link - the <a href='#{foo}/{bar}/{bar}> from any arguments
+    // Requires the user to include the closing </a> in the template
+    Handlebars.registerHelper("halflink", function(path) {
+
+      var url = _.reject(_.toArray(arguments), function(i) {
+            return typeof i != "string";
+          }).join("/");
+
+        return "<a href='#"+ url +"'>";
+    });
+
     var Router = Backbone.Router.extend({
           routes: {
             "": "home",
