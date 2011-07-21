@@ -88,9 +88,9 @@ if ( !Function.prototype.bind ) {
       l = !line ? 1 : ( line.length || 1 );
 
       if (i < startRow) {
-        r.start += l;
+        r.start += l + 1;
       }
-      r.end += l;
+      r.end += l + 1;
       i++;
     }
 
@@ -104,26 +104,19 @@ if ( !Function.prototype.bind ) {
   function expandColabPos( op ) {
     var chars,
         i = 0,
-        // colab.js provides the index in the string *after* the edit
-        // ACE needs the range to begin at the index in the string *before* the edit
-        columnPos = op.pos-1,
+        columnPos = op.pos,
         lines = this.ace.session.doc.$lines,
-        l = lines.length,
-        point = { row: 0, column: 0 };
+        l = lines.length;
 
-    while(i < l) {
-      point.row = i;
+    for (i=0; i < l; i++) {
       chars = lines[i].length;
-      console.log(lines[i], chars, columnPos);
       if (columnPos <= chars) {
         break;
       }
       columnPos -= chars + 1;
-      i++;
     }
 
-    point.column = columnPos;
-    return point;
+    return {row: i, column: columnPos};
   }
 
   ColabEditor.prototype.aceChange = function( event ) {
@@ -185,10 +178,6 @@ if ( !Function.prototype.bind ) {
 
     switch ( operation ) {
       case "INSERT":
-        if (chg.val == "\n") {
-          startPos.row +=1;
-          startPos.column = 0;
-        }
         this.ace.session.insert(startPos, chg.val);
         break;
       case "DELETE":
