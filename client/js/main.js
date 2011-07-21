@@ -450,9 +450,14 @@
             }
           },
           render: function() {
-            var data = this.options.doc.toJSON();
+            var self = this,
+                data = this.doc.toJSON();
             $(this.el).html(this.template(data));
-            this.editor = new ColabEditor( $(this.el).find("div.editor")[0], data);
+            // Hack to allow DOM to repain before rendering editor
+            // Prevent editor from being drawn to incorrect size in Firefox
+            setTimeout(function() {
+              FC.currentEditor = self.editor = new ColabEditor( $(self.el).find("div.editor")[0], data);
+            },0);
             return this;
           }
         }),
