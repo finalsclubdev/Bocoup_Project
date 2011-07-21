@@ -152,32 +152,31 @@ exports['updateCursor()'] = function(test) {
 };
 
 exports['getJoinedUsers()'] = function(test) {
-  test.expect(4);
+  test.expect(3);
 
   test.throws(
     function() { docDAO.getJoinedUsers('gid123123', 'did123123'); },
     'Did not throw up when no one has joined the doc yet.'
   );
 
-  test.doesNotThrow(
-    function() {
-      docDAO.join('uiduiduid', 'some-doc-slug', 'grpID-A', function(data, err) {
-        test.equal(err, null, 'There was a problem joining the doc.');
+  docDAO.join('uiduiduid', 'some-doc-slug', 'grpID-A', function(data, err) {
+    test.equal(
+      err,
+      null,
+      'There was a problem joining the doc.'
+    );
 
-        test.doesNotThrow(
-          function() { docDAO.getJoinedUsers('grpID-A', 'some-doc-slug'); },
-          'Threw up on a valid, existing doc ID.'
-        );
+    test.doesNotThrow(
+      function() { docDAO.getJoinedUsers('grpID-A', 'some-doc-slug'); },
+      'Threw up on a valid, existing doc ID.'
+    );
 
-        test.done();
-      });
-    },
-    'join() threw'
-  );
+    test.done();
+  });
 };
 
 exports['getUserJoinedDoc()'] = function(test) {
-  test.expect(7);
+  test.expect(6);
 
   test.equal(
     typeof docDAO.getUserJoinedDoc,
@@ -196,25 +195,20 @@ exports['getUserJoinedDoc()'] = function(test) {
     'Did not return null when the user has not joined any docs yet.'
   );
 
-  test.doesNotThrow(
-    function() {
-      docDAO.join('bwahuser', 'some-doc-slug', 'grpID-A', function(data, err) {
-        test.equal(err, null, 'There was a problem joining the doc.');
+  docDAO.join('bwahuser', 'some-doc-slug', 'grpID-A', function(data, err) {
+    test.equal(err, null, 'There was a problem joining the doc.');
 
-        var docID;
+    var docID;
 
-        test.doesNotThrow(
-          function() { docID = docDAO.getUserJoinedDoc('bwahuser'); },
-          'Threw up on a valid uid.'
-        );
+    test.doesNotThrow(
+      function() { docID = docDAO.getUserJoinedDoc('bwahuser'); },
+      'Threw up on a valid uid.'
+    );
 
-        test.strictEqual(docID, 'some-doc-slug', 'Did not return the proper doc id.');
+    test.strictEqual(docID, 'some-doc-slug', 'Did not return the proper doc id.');
 
-        test.done();
-      });
-    },
-    'Threw up on joining the doc.'
-  );
+    test.done();
+  });
 };
 
 exports['changeDoc()'] = function(test) {
