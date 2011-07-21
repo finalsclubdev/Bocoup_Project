@@ -47,11 +47,13 @@ if ( !Function.prototype.bind ) {
   ColabEditor.prototype.lock = function() {
     this.locked = true;
     this.ace.setReadOnly( true );
+    this.ace.$blockScrolling = 1;
   };
 
   ColabEditor.prototype.unlock = function() {
     this.locked = false;
     this.ace.setReadOnly( false );
+    this.ace.$blockScrolling = 0;
   };
 
   ColabEditor.prototype.cmdBuffer = {
