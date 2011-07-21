@@ -54,6 +54,36 @@ if ( !Function.prototype.bind ) {
     this.ace.setReadOnly( false );
   };
 
+  ColabEditor.prototype.cmdBuffer = {
+    buffer: [],
+    rate: 11,
+    queue: function(action) {
+      this.buffer.push(action);
+      this.process();
+    },
+    processing: false,
+    process: function() {
+      if (this.processing) {
+        return;
+      }
+
+      var self = this;
+      function execCmd() {
+        var cmd = self.buffer.shift();
+        colab[cmd.method].apply(colab, cmd.args);
+        console.log(cmd, +new Date, self.buffer.length);
+        if (self.buffer.length) {
+          setTimeout(execCmd, self.rate);
+        } else {
+          self.processing = false;
+        }
+      }
+      this.processing = true;
+      setTimeout(execCmd, self.rate);
+
+    }
+  };
+
   function onJoin( doc ) {
     colab.removeDocObserver( onJoin );
 
@@ -149,8 +179,10 @@ if ( !Function.prototype.bind ) {
     }
 
     if (operation) {
-      console.log("Sending document change event", operation, range.end, value);
-      colab.changeDoc(operation, range.end, value);
+      this.cmdBuffer.queue({
+        method: "changeDoc",
+        args: [operation, range.end, value]
+      });
     }
   };
 
