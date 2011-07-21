@@ -61,6 +61,8 @@ if ( !Function.prototype.bind ) {
       console.log('cursor update', data);
     });
 
+    colab.addDocObserver('change', this.remoteChange.bind(this));
+
     this.ace.session.on( "change", this.aceChange.bind(this) );
     this.ace.session.selection.on( "changeCursor", this.localCursorChange.bind(this) );
     this.unlock();
