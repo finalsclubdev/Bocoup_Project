@@ -14,7 +14,7 @@
     });
 
     Handlebars.registerHelper("documentName", function(doc) {
-      return doc.name || doc.text.substring(0,20) + "...";
+      return doc.id || doc.text.substring(0,20) + "...";
     });
 
     var Router = Backbone.Router.extend({
