@@ -102,10 +102,12 @@ var colab = (function(io) {
     observers.notify(observers.docEvents, 'join', data);
   });
 
-  docSock.on('part', function() {
-    currDoc = {};
+  docSock.on('part', function(uid) {
+    if(currUser.id === uid) {
+      currDoc = {};
+    }
 
-    observers.notify(observers.docEvents, 'part');
+    observers.notify(observers.docEvents, 'part', uid);
   });
 
   docSock.on('cursor', function(data) {
@@ -242,7 +244,8 @@ var colab = (function(io) {
       if(currUser.id && currDoc.id) {
         docSock.emit('part', {
           uid: currUser.id,
-          docID: currDoc.id
+          docID: currDoc.id,
+          gid: currDoc.gid
         });
       }
     },

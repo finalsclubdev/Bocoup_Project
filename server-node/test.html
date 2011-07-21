@@ -26,8 +26,6 @@
 
     colab.addDocObserver('join', function(id) {
       console.log('just joined', id);
-
-      sendInsert();
     });
 
     colab.addDocObserver('get', function(doc) {
@@ -40,6 +38,10 @@
 
     colab.addGroupObserver('getGroups', function(data) {
       console.log('groups', data);
+    });
+
+    colab.addDocObserver('part', function(uid) {
+      console.log('user just parted', uid);
     });
 
     colab.login(prompt('login'));
