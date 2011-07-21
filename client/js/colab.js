@@ -94,10 +94,9 @@ var colab = (function(io) {
 
   //dockSock events.
   docSock.on('join', function(data) {
-    currDoc = {
-      id: data.id,
-      gid: data.gid
-    };
+    if(typeof data === 'object') {
+      currDoc = data.doc;
+    }
 
     observers.notify(observers.docEvents, 'join', data);
   });
