@@ -35,9 +35,14 @@ exports["makeDocState() input validation"] = function(test) {
 };
 
 exports["makeDocState() output's functions"] = function(test) {
-  test.expect(32);
+  test.expect(36);
 
-  var state = docFactory.makeDocState({ id: 'did123123', gid: 'gid123123' });
+  var state = docFactory.makeDocState({
+    id: 'did123123',
+    gid: 'gid123123',
+    seq: null,
+    text: ''
+  });
 
   // Make sure the base functions exist.
   test.equal(
@@ -74,6 +79,24 @@ exports["makeDocState() output's functions"] = function(test) {
     typeof state.execCommand,
     'function',
     'execCommand() does not exist on the state object.'
+  );
+
+  test.equal(
+    typeof state.getDocText,
+    'function',
+    'getDocText() does not exist on the state object.'
+  );
+
+  test.equal(
+    typeof state.flushBuffer,
+    'function',
+    'flushBuffer() does not exist on the state object.'
+  );
+
+  test.equal(
+    typeof state.getDoc,
+    'function',
+    'getDoc() does not exist on the state object.'
   );
 
   // Make sure functions that require a user fail when provided a non-existing one.
@@ -187,6 +210,20 @@ exports["makeDocState() output's functions"] = function(test) {
     function() { state.execCommand(invalidCommand); },
     'Did not throw up on a invalid command op.'
   );
+
+  var doc = state.getDoc();
+
+  test.deepEqual(
+    doc,
+    {
+      id: 'did123123',
+      gid: 'gid123123',
+      seq: 0,
+      text: ''
+    }
+  );
+
+  var flushedDoc = state.flushBuffer();
 
   test.done();
 };

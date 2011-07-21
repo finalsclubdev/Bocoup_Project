@@ -354,6 +354,25 @@ exports.makeDocState = function(doc) {
         }
 
         return doc;
+      },
+
+      /*
+       * Takes the internal document state, applies any buffered commands to it
+       * (meaning OT), and returns that updated document state. This operation
+       * does not flush the commands buffer or update the internal state: use
+       * flushBuffer() for that.
+       */
+      getDoc: function() {
+        var newDoc = doc;
+
+        var headCommand = getHeadCommand();
+
+        if(headCommand) {
+          doc.text = this.getDocText();
+          doc.seq = headCommand.seq;
+        }
+
+        return newDoc;
       }
     };
   })(doc);
