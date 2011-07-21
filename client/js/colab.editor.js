@@ -107,29 +107,27 @@ if ( !Function.prototype.bind ) {
   // Converts ACE's two dimensional text range objects (row & column)
   // to a one-dimensional string-based range
   function flattenAceRange( range ) {
-    var line,
+    var chars,
+        lines = this.ace.session.doc.$lines,
         i = 0,
-        l = 0,
-        r = { start: 0, end: 0},
-        startRow = range.start.row,
-        endRow = range.end.row;
+        l = lines.length,
+        r = { start: 0, end: 0};
 
-    while(i < endRow) {
-      // Make sure that a blank line counts
-      // But not a line that isn't in the internal $lines array
-      line = this.ace.session.doc.$lines[i];
-      l = !line ? 1 : ( line.length || 1 );
-
-      if (i < startRow) {
-        r.start += l + 1;
+    for (i=0; i<l; i++) {
+      chars = lines[i].length;
+      if (i < range.start.row) {
+        r.start += chars + 1;
+      } else if (i == range.start.row) {
+        r.start += range.start.column;
       }
-      r.end += l + 1;
-      i++;
-    }
 
-    // Add the column of where the edit was made
-    r.start += range.start.column;
-    r.end += range.end.column;
+      if (i < range.end.row) {
+        r.end += chars + 1;
+      } else if (i == range.end.row) {
+        r.end += range.end.column;
+        break;
+      }
+    }
 
     return r;
   }
@@ -166,9 +164,6 @@ if ( !Function.prototype.bind ) {
         console.log("ORIGINAL RANGE", event.data.text, event.data.range, "COLAB RANGE", range);
         operation = "INSERT";
         value = event.data.text;
-        if (value == "\n") {
-          range.end++;
-        }
         break;
       case "insertLines":
         console.info("INSERTLINES", event.data);
