@@ -138,7 +138,7 @@ if ( !Function.prototype.bind ) {
   function expandColabPos( op ) {
     var chars,
         i = 0,
-        columnPos = op.pos,
+        columnPos = op.pos-1,
         lines = this.ace.session.doc.$lines,
         l = lines.length;
 
