@@ -1,13 +1,16 @@
 var groupValidator = require('../validators/GroupValidator.js');
 var docValidator = require('../validators/DocValidator.js');
 
+// doc _id => last seen _rev from a getDoc()
+var revCache = {};
+
 function makeGroupID(gid) {
   return 'group:' + gid;
 }
 
-function makeDocID(id, gid) {
+function makeDocID(id, gid, doNotEncode) {
   //%2f being a URL encoded slash ('/')
-  return 'doc:' + gid + '%2f' + id;
+  return 'doc:' + gid + ((doNotEncode) ? '/' : '%2f') + id;
 }
 
 exports.getGroup = function(gid, callback) {
@@ -97,12 +100,50 @@ exports.getDoc = function(id, gid, callback) {
     if(!err) {
       doc.id = doc._id.substr(doc._id.indexOf('/') + 1);
 
+      revCache[doc._id] = doc._rev;
+
       delete doc._id;
       delete doc._rev;
     }
 
     callback(err, doc);
   });
+};
+
+exports.updateDoc = function(id, gid, doc, callback) {
+  if(!docValidator.isValidID(id)) {
+    throw 'Invalid document id.';
+  }
+
+  if(!groupValidator.isValidID(id)) {
+    throw 'Invalid group id.';
+  }
+
+  //TODO more validation
+
+  //TODO if we don't have revCache[] and !_rev, then go get the doc
+
+  doc._id = makeDocID(id, gid);
+  delete doc.id;
+
+  if(!doc._rev && revCache[makeDocID(id, gid, true)]) {
+    doc._rev = revCache[makeDocID(id, gid, true)];
+  }
+  else {
+   throw 'no _rev for a doc that we are updating';
+  }
+
+  this.db.put(
+    doc._id,
+    doc,
+    function(err, res) {
+      if(!err) {
+        revCache[res.id] = res.rev;
+      }
+
+      callback(err, res);
+    }
+  );
 };
 
 exports.getGroups = function(callback) {

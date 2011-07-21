@@ -147,10 +147,18 @@ exports.join = function(uid, docID, gid, callback) {
         docStates[mapID] = docFactory.makeDocState(doc);
 
         docStates[mapID].addChangeObserver(function(data) {
-          if(data.command.seq > 0 && data.command.seq % 20 === 0) {
+          if(data.command.seq > 0 && data.command.seq % 2 === 0) {
             var docToPersist = docStates[mapID].flushBuffer();
             console.log('docToPersist', docToPersist);
-            //TODO persist the doc
+
+            dbDriver.updateDoc(docID, gid, docToPersist, function(err, res) {
+              if(err) {
+                console.log('failed to persist a doc during checkin!', err);
+              }
+              else {
+                console.log('new doc info', res);
+              }
+            });
           }
         });
       }
