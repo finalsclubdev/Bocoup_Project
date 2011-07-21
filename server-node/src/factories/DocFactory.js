@@ -8,11 +8,11 @@ exports.makeDocState = function(doc) {
   }
 
   if(!docValidator.isValidID(doc.id)) {
-    throw 'That doc object has an invalid id.';
+    throw 'That doc object has an invalid id. Likely a database problem.';
   }
 
   if(!groupValidator.isValidID(doc.gid)) {
-    throw 'That does object has an invalid gid.';
+    throw 'That doc object has an invalid gid. Likely a database problem.';
   }
   
   return (function(doc) {
