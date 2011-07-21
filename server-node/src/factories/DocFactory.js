@@ -142,11 +142,13 @@ exports.makeDocState = function(doc) {
 
           delete users[uid];
 
-          //TODO inform the other clients
+          return true;
         }
         else {
           throw 'That is not a valid UID.';
         }
+
+        return false;
       },
 
       addCursorObserver: function(callback) {

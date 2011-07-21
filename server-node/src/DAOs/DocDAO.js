@@ -159,20 +159,48 @@ exports.join = function(uid, docID, gid, callback) {
   });
 };
 
-exports.part = function(uid, docID) {
+/**
+ * Parts a user from a document.
+ *
+ * @param {String} uid The user's ID.
+ *
+ * @param {String} gid The document's group's ID.
+ *
+ * @param {String} docID The document's ID.
+ *
+ * @param {Function} callback The callback: fn(err).
+ */
+exports.part = function(uid, gid, docID, callback) {
   if(!userValidator.isName(uid)) {
     throw 'Invalid UID.';
   }
 
-  if(!docID || typeof docID != 'string') {
+  if(!docValidator.isValidID(docID)) {
     throw 'Invalid document ID.';
   }
 
-  if(!docStates[docID]) {
+  if(!groupValidator.isValidID(gid)) {
+    throw 'Invalid group ID.';
+  }
+
+  var mapID = makeDocStatesMapKey(gid, docID);
+
+  if(!docStates[mapID]) {
     throw 'No one has joined that document, so why are you trying to part with it?';
   }
 
-  docStates[docID].partUser(uid);
+  var err;
+
+  try {
+    if(!docStates[mapID].partUser(uid)) {
+      err = 'You just tried to part a user from a document that they were not joined to.';
+    }
+  }
+  catch(e) {
+    err = e;
+  }
+
+  callback(err || null);
 };
 
 /**
