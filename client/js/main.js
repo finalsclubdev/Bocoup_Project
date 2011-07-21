@@ -17,16 +17,16 @@
       return doc.id || doc.text.substring(0,20) + "...";
     });
 
+    Handlebars.registerHelper("link", function(path) {
 
-    // Builds the first part of a link - the <a href='#{foo}/{bar}/{bar}> from any arguments
-    // Requires the user to include the closing </a> in the template
-    Handlebars.registerHelper("halflink", function(path) {
+      var url = _.toArray(arguments),
+          title = url.shift();
 
-      var url = _.reject(_.toArray(arguments), function(i) {
+          url = _.reject(url, function(i) {
             return typeof i != "string";
           }).join("/");
 
-        return "<a href='#"+ url +"'>";
+          return "<a href='#"+ url +"'>"+title+"</a>";
     });
 
     var Router = Backbone.Router.extend({

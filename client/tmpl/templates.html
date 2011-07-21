@@ -36,7 +36,7 @@
   Here's the list of groups
   <ul>
   {{#each groups}}
-    <li>{{{halflink "group" id}}}{{id}}</a></li>
+    <li>{{{link id "group" id}}}</li>
   {{/each}}
   </ul>
 </div>
@@ -48,7 +48,7 @@
   <h3>Documents</h3>
   <ul>
   {{#each docs}}
-    <li>{{{halflink "group" gid id}}}{{documentName this}}</a></li>
+    <li>{{{link id "group" gid id}}}</li>
   {{/each}}
   </ul>
 </div>
@@ -56,7 +56,7 @@
 <div class="template" id="doc">
   <form>
     <h2>{{name}}</h2>
-    {{{halflink "group" gid}}}Return to Group</a>
+    {{{link "Return to Group" "group" gid}}}
     <div class="editor">{{text}}</div>
     <button class="toggleMessages" type="button">Start Messages</button>
   </form>
