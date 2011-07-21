@@ -73,7 +73,6 @@ if ( !Function.prototype.bind ) {
       function execCmd() {
         var cmd = self.buffer.shift();
         colab[cmd.method].apply(colab, cmd.args);
-        console.log(cmd, +new Date, self.buffer.length);
         if (self.buffer.length) {
           setTimeout(execCmd, self.rate);
         } else {
@@ -82,12 +81,12 @@ if ( !Function.prototype.bind ) {
       }
       this.processing = true;
       setTimeout(execCmd, self.rate);
-
     }
   };
 
   function onJoin( doc ) {
     colab.removeDocObserver( onJoin );
+    console.log("onJoin", doc);
 
     colab.addDocObserver('cursor', function(data) {
       console.log('cursor update', data);
@@ -164,6 +163,7 @@ if ( !Function.prototype.bind ) {
 
     switch (action) {
       case "insertText":
+        console.log("ORIGINAL RANGE", event.data.text, event.data.range, "COLAB RANGE", range);
         operation = "INSERT";
         value = event.data.text;
         if (value == "\n") {
@@ -176,6 +176,7 @@ if ( !Function.prototype.bind ) {
       case "removeText":
       case "removeLines":
         operation = "DELETE";
+        console.log("ORIGINAL RANGE",  event.data.range, "COLAB RANGE", range);
         value = range.end - range.start;
         break;
     }
@@ -214,6 +215,7 @@ if ( !Function.prototype.bind ) {
 
     switch ( operation ) {
       case "INSERT":
+        console.log("GENERATED RANGE", chg.val, startPos);
         this.ace.session.insert(startPos, chg.val);
         break;
       case "DELETE":
@@ -224,6 +226,7 @@ if ( !Function.prototype.bind ) {
         break;
     }
 
+    console.log(startPos, endPos);
     this.unlock();
   };
 
