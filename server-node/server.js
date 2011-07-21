@@ -170,6 +170,38 @@ var docRoutes = io.of('/doc')
       }
     });
 
+    socket.on('part', function(data) {
+      try {
+        docDAO.part(data.uid, data.gid, data.docID, function(err) {
+          if(err) {
+            socket.emit('err', err);
+          }
+          else {
+            socket.emit('part', data.uid);
+
+            var users = docDAO.getJoinedUsers(data.gid, data.docID);
+
+            for(var i in users) {
+              if(users.hasOwnProperty(i)) {
+                var user = userDAO.get(i);
+
+                if(user) {
+                  var sid = user.sessionID;
+
+                  if(socket.namespace.sockets[sid]) {
+                    socket.namespace.sockets[sid].emit('part', data.uid);
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+      catch(e) {
+        socket.emit('err', e);
+      }
+    });
+
     socket.on('cursor', function(data) {
       try {
         docDAO.updateCursor(data.gid, data.docID, data.uid, data.pos);
