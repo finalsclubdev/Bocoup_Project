@@ -72,7 +72,14 @@ exports.get = function(id, gid, callback) {
     throw 'Invalid callback.';
   }  
 
-  dbDriver.getDoc(id, gid, callback);
+  var mapID = makeDocStatesMapKey(gid, id);
+
+  if(docStates[mapID]) {
+    callback(null, docStates[mapID].getDoc());
+  }
+  else {
+    dbDriver.getDoc(id, gid, callback);
+  }
 };
 
 /**

@@ -162,7 +162,17 @@ var docRoutes = io.of('/doc')
           }
 
           // Tell them that they joined after everything is set up.
-          socket.emit('join', { id: data.docID, gid: data.gid });
+          docDAO.get(data.docID, data.gid, function(err, doc) {
+            if(err) {
+              socket.emit('err', err);
+            }
+            else {
+              socket.emit('join', {
+                doc: doc,
+                users: docDAO.getJoinedUsers(data.gid, data.docID)
+              });
+            }
+          });
         });
       }
       catch(e) {
