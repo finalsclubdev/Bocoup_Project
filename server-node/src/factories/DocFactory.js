@@ -109,7 +109,7 @@ exports.makeDocState = function(doc) {
       }
 
       for(var i in commandBuffer) {
-        if(commandBuffer.hasOwnProperty(i) {
+        if(commandBuffer.hasOwnProperty(i)) {
           if(commandBuffer[i].seq === seq) {
             return commandBuffer[i].seq;
           }
