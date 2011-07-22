@@ -58,7 +58,7 @@ if ( !Function.prototype.bind ) {
 
   ColabEditor.prototype.cmdBuffer = {
     buffer: [],
-    rate: 11,
+    rate: 32,
     queue: function(action) {
       this.buffer.push(action);
       this.process();
