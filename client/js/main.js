@@ -330,6 +330,7 @@
           },
           submit: function(e) {
             e.preventDefault();
+            colab.partDoc();
             colab.logout();
           }
         }),
