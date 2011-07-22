@@ -17,6 +17,20 @@ function makeDocStatesMapKey(gid, docID) {
   return gid + '/' + docID;
 }
 
+function persistDoc(gid, docID) {
+  var docToPersist = docStates[makeDocStatesMapKey(gid, docID)].flushBuffer();
+  console.log('docToPersist', docToPersist);
+
+  dbDriver.updateDoc(docID, gid, docToPersist, function(err, res) {
+    if(err) {
+      console.log('failed to persist a doc!', err);
+    }
+    else {
+      console.log('new doc db info', res);
+    }
+  });
+}
+
 /**
  * Creates a new document in a group with a provided ID and returns it.
  *
@@ -148,17 +162,7 @@ exports.join = function(uid, docID, gid, callback) {
 
         docStates[mapID].addChangeObserver(function(data) {
           if(data.command.seq > 0 && data.command.seq % 2 === 0) {
-            var docToPersist = docStates[mapID].flushBuffer();
-            console.log('docToPersist', docToPersist);
-
-            dbDriver.updateDoc(docID, gid, docToPersist, function(err, res) {
-              if(err) {
-                console.log('failed to persist a doc during checkin!', err);
-              }
-              else {
-                console.log('new doc info', res);
-              }
-            });
+            persistDoc(data.gid, data.docID);
           }
         });
       }
@@ -220,6 +224,11 @@ exports.part = function(uid, gid, docID, callback) {
   }
 
   callback(err || null);
+
+  if(docStates[mapID].numUsers() <= 0) {
+    //Everyone has dropped off the document, so it's time to persist it.
+    persistDoc(gid, docID);
+  }
 };
 
 /**

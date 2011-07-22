@@ -150,6 +150,18 @@ exports.makeDocState = function(doc) {
         return false;
       },
 
+      numUsers: function() {
+        var num = 0;
+
+        for(var i in users) {
+          if(users.hasOwnProperty(i)) {
+            num++;
+          }
+        }
+
+        return num;
+      },
+
       addCursorObserver: function(callback) {
         if(typeof callback != 'function') {
           throw 'Callbacks must be functions.';
