@@ -108,7 +108,6 @@ exports.makeDocState = function(doc) {
     }
 
     function setHeadCommand(command) {
-      //TODO validate
       commandBuffer.push(command);
     }
 
