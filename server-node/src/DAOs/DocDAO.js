@@ -161,7 +161,7 @@ exports.join = function(uid, docID, gid, callback) {
         docStates[mapID] = docFactory.makeDocState(doc);
 
         docStates[mapID].addChangeObserver(function(data) {
-          if(data.command.seq > 0 && data.command.seq % 2 === 0) {
+          if(data.command.seq > 0 && data.command.seq % 500 === 0) {
             persistDoc(data.gid, data.docID);
           }
         });
