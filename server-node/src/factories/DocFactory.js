@@ -99,6 +99,10 @@ exports.makeDocState = function(doc) {
       return commandBuffer[commandBuffer.length - 1];
     }
 
+    function getBufferUsage() {
+      return commandBuffer.length;
+    }
+
     function getNextSeq() {
       return commandBuffer.length;
     }
@@ -139,6 +143,10 @@ exports.makeDocState = function(doc) {
           users[uid] = {
             cursorPos: 0
           };
+
+          if(getBufferUsage() > 0) {
+            replayToUser(uid, getTailCommand().seq, getHeadCommand().seq);
+          }
 
           fireCursorChange(uid, users[uid].cursorPos);
         }
