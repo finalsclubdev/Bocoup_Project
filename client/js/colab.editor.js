@@ -85,8 +85,8 @@ if ( !Function.prototype.bind ) {
   };
 
   function onJoin( doc ) {
-    colab.removeDocObserver( onJoin );
     console.log("onJoin", doc);
+    colab.removeDocObserver( "join" );
 
     colab.addDocObserver('cursor', function(data) {
       console.log('cursor update', data);
