@@ -159,12 +159,6 @@ exports.join = function(uid, docID, gid, callback) {
       if(!docStates[mapID]) {
         newDocState = true;
         docStates[mapID] = docFactory.makeDocState(doc);
-
-        docStates[mapID].addChangeObserver(function(data) {
-          if(data.command.seq > 0 && data.command.seq % 500 === 0) {
-            persistDoc(data.gid, data.docID);
-          }
-        });
       }
 
       users[uid] = mapID;
