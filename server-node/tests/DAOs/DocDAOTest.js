@@ -198,17 +198,21 @@ exports['getUserJoinedDoc()'] = function(test) {
   docDAO.join('bwahuser', 'some-doc-slug', 'grpID-A', function(data, err) {
     test.equal(err, null, 'There was a problem joining the doc.');
 
-    var docID;
-
     test.doesNotThrow(
-      function() { docID = docDAO.getUserJoinedDoc('bwahuser'); },
+      function() {
+        var doc = docDAO.getUserJoinedDoc('bwahuser');
+
+        test.deepEqual(
+          doc,
+          { id: 'some-doc-slug', gid: 'grpID-A' },
+          'Invalid doc info reported.'
+        );
+      },
       'Threw up on a valid uid.'
     );
-
-    test.strictEqual(docID, 'some-doc-slug', 'Did not return the proper doc id.');
-
-    test.done();
   });
+
+  test.done();
 };
 
 exports['changeDoc()'] = function(test) {

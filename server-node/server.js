@@ -34,10 +34,14 @@ var userRoutes = io.of('/user')
         var user = userDAO.getBySessionID(socket.id);
 
         if(user.id) {
-          var doc = docDAO.getUserJoinedDoc(user.id);
+          var docInfo = docDAO.getUserJoinedDoc(user.id);
 
-          if(doc) {
-            docDAO.part(user.id, doc.id);
+          if(docInfo) {
+            docDAO.part(user.id, docInfo.gid, docInfo.id, function(err) {
+              if(err) {
+                throw err;
+              }
+            });
           }
 
           userDAO.disconnect(socket.id);

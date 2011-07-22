@@ -198,6 +198,10 @@ exports.part = function(uid, gid, docID, callback) {
     throw 'Invalid group ID.';
   }
 
+  if(typeof callback !== 'function') {
+    throw 'Invalid callback type.';
+  }
+
   var mapID = makeDocStatesMapKey(gid, docID);
 
   if(!docStates[mapID]) {
@@ -315,5 +319,12 @@ exports.getUserJoinedDoc = function(uid) {
     throw 'Invalid user id.';
   }
 
-  return (users[uid]) ? users[uid].substr(users[uid].indexOf('/') + 1) : null;
+  if(!users[uid]) {
+    return null;
+  }
+
+  return {
+    id: users[uid].substr(users[uid].indexOf('/') + 1),
+    gid: users[uid].substr(0, users[uid].indexOf('/'))
+  };
 };
