@@ -169,7 +169,7 @@ var docRoutes = io.of('/doc')
             else {
               socket.emit('join', {
                 doc: doc,
-                users: docDAO.getJoinedUsers(data.gid, data.docID)
+                users: docDAO.getJoinedUsers(doc.gid, doc.id)
               });
             }
           });
