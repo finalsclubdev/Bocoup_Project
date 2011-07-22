@@ -14,7 +14,19 @@
     });
 
     Handlebars.registerHelper("documentName", function(doc) {
-      return doc.name || doc.text.substring(0,20) + "...";
+      return doc.id || doc.text.substring(0,20) + "...";
+    });
+
+    Handlebars.registerHelper("link", function(path) {
+
+      var url = _.toArray(arguments),
+          title = url.shift();
+
+          url = _.reject(url, function(i) {
+            return typeof i != "string";
+          }).join("/");
+
+          return "<a href='#"+ url +"'>"+title+"</a>";
     });
 
     var Router = Backbone.Router.extend({
@@ -22,6 +34,7 @@
             "": "home",
             "404": "404",
             "login": "login",
+            "unavailable": "unavailable",
             "groups": "groupList",
             "group/:groupid": "group",
             "group/:groupid/:docid": "doc"
@@ -36,6 +49,14 @@
           },
           login: function() {
             FC.main.transition( new LoginView() );
+          },
+          unavailable: function() {
+            // If the user was on the "unavailable" page and the socket
+            // is in fact available, redirect them back home
+            // (Happens after refreshing after socket failure)
+            if (FC.connection) {
+              Backbone.history.navigate("", true);
+            }
           },
           groupList: function(e) {
             console.log("fetching groups");
@@ -299,7 +320,7 @@
             var user = FC.users.at( 0 ),
                 data = user ? user.toJSON() : {};
 
-            data.connected = FC.connected.isResolved();
+            data.connected = FC.connected;
 
             $(this.el).html( this.template( data ) );
             return this;
@@ -429,9 +450,14 @@
             }
           },
           render: function() {
-            var data = this.options.doc.toJSON();
+            var self = this,
+                data = this.doc.toJSON();
             $(this.el).html(this.template(data));
-            this.editor = new ColabEditor( $(this.el).find("div.editor")[0], data);
+            // Hack to allow DOM to repain before rendering editor
+            // Prevent editor from being drawn to incorrect size in Firefox
+            setTimeout(function() {
+              FC.currentEditor = self.editor = new ColabEditor( $(self.el).find("div.editor")[0], data);
+            },0);
             return this;
           }
         }),
@@ -444,7 +470,8 @@
           // in order to defer hash history tracking until after the
           // socket is connected and a user stored in localStorage is logged in, 
           // as well as after Group data has been bootstrapped.
-          connected: jQuery.Deferred(),
+          connection: jQuery.Deferred(),
+          connected: false,
           init: function() {
 
             // When the document is ready, insert the main view
@@ -462,7 +489,7 @@
             // Wait for the connection to be established or unavailable
             // before setting up the remaining handlers or redirecting to #unavailable,
             // and finally starting hash history tracking
-            $.when( FC.connected )
+            $.when( FC.connection )
             .then( FC.onSocketConnect )
             .fail( FC.onSocketFail )
             .always( function() {
@@ -470,6 +497,7 @@
               // we'll attempt to grab the groups before starting hash tracking
               $.when( FC.groups.length || FC.groups.fetch() )
               .always( function(groups) {
+                FC.connected = FC.connection.isResolved();
                 Backbone.history.start();
               });
             });
@@ -477,16 +505,18 @@
             // Wait 2.5 seconds before considering the socket unavailable
             // and re-routing to an offline state 
             setTimeout(function() {
-              FC.connected.reject({msg: "Socket connection timed out!"});
+              FC.connection.reject({msg: "Socket connection timed out!"});
             },2500);
 
             colab.onError = function( excp ) {
               console.log(excp);
               switch ( excp ) {
                 case "That name is already in use.":
-                  FC.users.at(0) && FC.users.at(0).destroy();
+                  FC.users.at(0) && FC.users.each(function(u) {
+                    u.destroy();
+                  });
                   window.location.hash = "login";
-                  FC.connected.resolve({msg: excp});
+                  FC.connection.resolve({msg: excp});
               }
             };
 
@@ -497,7 +527,7 @@
                 // If there is no user in localStorage,
                 // prepare to send the user to login
                 window.location.hash = "login";
-                FC.connected.resolve({msg: "Connected, but not logged in"});
+                FC.connection.resolve({msg: "Connected, but not logged in"});
               } else {
                 // If a user exists, we still need to wait for login before
                 // resolving the connection deferred
@@ -515,7 +545,7 @@
               window.location.hash = destHash;
 
               console.log(FC.users.at(0).get("uid") + " logged in");
-              FC.connected.resolve({msg: "Connected", user: FC.users.at(0)});
+              FC.connection.resolve({msg: "Connected", user: FC.users.at(0)});
 
               // Once successfully logged in, we have to make sure to log out
               // if the user unloeads the window, otherwise we won't be able to refresh
@@ -531,7 +561,6 @@
             window.location.hash = "unavailable";
           },
           onSocketConnect: function( resp ) {
-
             colab.addUserObserver('loggedOut', function() {
               // Destroy local user
               FC.users.each(function(u) {
