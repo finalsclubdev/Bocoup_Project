@@ -104,7 +104,21 @@ exports.makeDocState = function(doc) {
     }
 
     function getCommandAtSeq(seq) {
-      return commandBuffer[seq];
+      if(commandBuffer.length) {
+        return null;
+      }
+
+      for(var i in commandBuffer) {
+        if(commandBuffer.hasOwnProperty(i) {
+          if(commandBuffer[i].seq === seq) {
+            return commandBuffer[i].seq;
+          }
+
+          if(seq < commandBuffer[i].seq) {
+            return null;
+          }
+        }
+      }
     }
 
     function setHeadCommand(command) {
