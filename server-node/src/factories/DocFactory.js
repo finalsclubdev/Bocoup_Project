@@ -362,13 +362,18 @@ exports.makeDocState = function(doc) {
        * flushBuffer() for that.
        */
       getDoc: function() {
-        var newDoc = doc;
+        var newDoc = {
+          id: doc.id,
+          gid: doc.gid,
+          text: doc.text,
+          seq: doc.seq
+        };
 
         var headCommand = getHeadCommand();
 
         if(headCommand) {
-          doc.text = this.getDocText();
-          doc.seq = headCommand.seq;
+          newDoc.text = this.getDocText();
+          newDoc.seq = headCommand.seq;
         }
 
         return newDoc;
