@@ -22,10 +22,17 @@ var colab = (function(io) {
     },
 
     remove: function(observers, fn) {
+      var removed = false;
       for(var i in observers) {
-        if(observers.hasOwnProperty(i) && observers[i].callback === fn) {
-          observers.splice(i, 1);
+        if(observers.hasOwnProperty(i)) {
+          if (observers[i][typeof fn == "function" ? "callback" : "eventName"] === fn) {
+            observers.splice(i, 1);
+            removed = true;
+          }
         }
+      }
+      if(!removed) {
+        throw 'That is not a function or bound observer name.';
       }
     }
   };
@@ -159,10 +166,6 @@ var colab = (function(io) {
 
     //The inverse of addGroupObserver()
     removeGroupObserver: function(fn) {
-      if(typeof fn !== 'function') {
-        throw 'That is not a function.';
-      }
-
       observers.remove(observers.groupEvents, fn);
     },
 
@@ -176,10 +179,6 @@ var colab = (function(io) {
 
     //The inverse of addUserObserver()
     removeUserObserver: function(fn) {
-      if(typeof fn !== 'function') {
-        throw 'That is not a function.';
-      }
-
       observers.remove(observers.userEvents, fn);
     },
 
@@ -193,10 +192,6 @@ var colab = (function(io) {
 
     //The inverse of removeDocObserver()
     removeDocObserver: function(fn) {
-      if(typeof fn !== 'function') {
-        throw 'That is not a function.';
-      }
-
       observers.remove(observers.docEvents, fn);
     },
 
