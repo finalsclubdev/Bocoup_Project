@@ -352,7 +352,12 @@ exports.makeDocState = function(doc) {
           flushCommands();
         }
 
-        return doc;
+        return {
+          id: doc.id,
+          gid: doc.gid,
+          seq: doc.seq,
+          text: doc.text
+        };
       },
 
       /*
