@@ -15,7 +15,7 @@ var colab = (function(io) {
 
     notify: function(observers, eventName, data) {
       for(var i in observers) {
-        if(!observers[i].eventName || observers[i].eventName === eventName) {
+        if(!observers[i].eventName || observers[i].eventName == eventName || observers[i].eventName.indexOf(eventName+".") === 0 ) {
           observers[i].callback(data);
         }
       }
