@@ -86,13 +86,13 @@ if ( !Function.prototype.bind ) {
 
   function onJoin( doc ) {
     console.log("onJoin", doc);
-    colab.removeDocObserver( "join" );
+    colab.removeDocObserver( "join.self" );
 
-    colab.addDocObserver('cursor', function(data) {
-      console.log('cursor update', data);
+    colab.addDocObserver("cursor", function(data) {
+      console.log("cursor update", data);
     });
 
-    colab.addDocObserver('change', this.remoteChange.bind(this));
+    colab.addDocObserver("change", this.remoteChange.bind(this));
 
     this.ace.session.on( "change", this.aceChange.bind(this) );
     this.ace.session.selection.on( "changeCursor", this.localCursorChange.bind(this) );
@@ -100,7 +100,7 @@ if ( !Function.prototype.bind ) {
   }
 
   ColabEditor.prototype.join = function( options ) {
-    colab.addDocObserver("join", onJoin.bind(this));
+    colab.addDocObserver("join.self", onJoin.bind(this));
     colab.joinDoc(this.doc.gid, this.doc.id);
   };
 
