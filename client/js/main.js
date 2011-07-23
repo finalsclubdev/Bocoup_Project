@@ -473,6 +473,10 @@
               FC.currentEditor = self.editor = new ColabEditor( $(self.el).find("div.editor")[0], data);
             },0);
             return this;
+          },
+          destroy: function() {
+            this.editor.destroy();
+            delete FC.currentEditor;
           }
         }),
 

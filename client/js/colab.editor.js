@@ -104,6 +104,10 @@ if ( !Function.prototype.bind ) {
     colab.joinDoc(this.doc.gid, this.doc.id);
   };
 
+  ColabEditor.prototype.destroy = function() {
+    colab.removeDocObserver( "change" );
+    colab.partDoc();
+  };
   // Converts ACE's two dimensional text range objects (row & column)
   // to a one-dimensional string-based range
   function flattenAceRange( range ) {
