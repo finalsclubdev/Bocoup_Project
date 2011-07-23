@@ -29,6 +29,12 @@
           return "<a href='#"+ url +"'>"+title+"</a>";
     });
 
+
+    // Add a destroy method to all Backbone views for possible cleanup
+    Backbone.View = Backbone.View.extend({
+      destroy: $.noop
+    });
+
     var Router = Backbone.Router.extend({
           routes: {
             "": "home",
@@ -120,9 +126,16 @@
           events: {
             "click a.back,a.doubleback": "back"
           },
+          lastView: false,
+          currentView: false,
           transition: function(view) {
             FC.header.render();
+
+            this.lastView = this.currentView || false;
+            this.currentView = view;
+
             $(this.el).html( view.render().el );
+            this.lastView && this.lastView.destroy();
           },
           back: function(e) {
             e.preventDefault();
