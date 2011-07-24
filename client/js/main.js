@@ -491,7 +491,7 @@
             var self = this,
                 data = this.doc.toJSON();
             $(this.el).html(this.template(data));
-            this.collaboratorList = new CollaboratorListView({
+            this.collaboratorListView = new CollaboratorListView({
               collaborators: this.collaborators,
               el: $(this.el).find(".collaborators")[0]
             });
