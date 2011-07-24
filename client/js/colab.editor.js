@@ -44,6 +44,8 @@ if ( !Function.prototype.bind ) {
     this.join();
   };
 
+  ColabEditor.prototype.collaborators = {};
+
   ColabEditor.prototype.lock = function() {
     this.locked = true;
     this.ace.setReadOnly( true );
@@ -86,11 +88,10 @@ if ( !Function.prototype.bind ) {
 
   function onJoin( doc ) {
     console.log("onJoin", doc);
+    this.collaborators = doc.users;
     colab.removeDocObserver( "join.self" );
-
-    colab.addDocObserver("cursor", function(data) {
-      console.log("cursor update", data);
-    });
+    colab.addDocObserver("cursor", this.remoteCursorChange.bind(this));
+    colab.addDocObserver("part", this.remotePart.bind(this));
 
     colab.addDocObserver("change", this.remoteChange.bind(this));
 
@@ -201,8 +202,25 @@ if ( !Function.prototype.bind ) {
     this.localCursorChangeTimeout = setTimeout( function() {
       var range = flattenAceRange.call(this, this.ace.getSelectionRange());
       colab.updateCursor( range.start );
-    }.bind(this),250);
+    }.bind(this),32);
   };
+
+  ColabEditor.prototype.remoteCursorChange = function(data) {
+    var point = expandColabPos.call(this, data),
+        range = new Range(point.row, point.column + 1, point.row, point.column + 2),
+        collaborator = this.collaborators[data.uid];
+
+    if ( !collaborator ) {
+      collaborator = this.collaborators[data.uid] = data;
+    }
+
+    collaborator.color = collaborator.color || FC.assignColor();
+    if (collaborator.cursor) {
+      this.ace.session.removeMarker( collaborator.cursor );
+    }
+    collaborator.cursor = this.ace.session.addMarker(range, 'remote_cursor '+collaborator.color,'text');
+  };
+
 
   ColabEditor.prototype.remoteChange = function( chg ) {
     this.lock();
@@ -229,4 +247,11 @@ if ( !Function.prototype.bind ) {
     this.unlock();
   };
 
+  ColabEditor.prototype.remotePart = function( id ) {
+    var collaborator = this.collaborators[id];
+    if ( collaborator ) {
+      this.ace.session.removeMarker( collaborator.cursor );
+      delete this.collaborators[id];
+    }
+  };
 })();

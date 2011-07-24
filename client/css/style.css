@@ -91,6 +91,45 @@ div.editor {
   height:500px;
 }
 
+/* thanks to phreach on freenode */
+@-webkit-keyframes caret_pulse {
+    0%   {opacity: 1;}
+    50%  {opacity: 0;}
+    100% {opacity: 1;}
+}
+
+.remote_cursor {
+    background-color:#000;
+    width:2px !important;
+    height:10px;
+    -webkit-animation-name: caret_pulse;
+    -webkit-animation-duration: 1s;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-timing-function: ease-in-out;
+    position:absolute;
+}
+
+.remote_cursor.red {
+    background-color:red;
+}
+.remote_cursor.orange {
+    background-color:#fd971f;
+}
+.remote_cursor.yellow {
+    background-color:#ca9f12;
+}
+.remote_cursor.lime {
+    background-color:#bada55;
+}
+.remote_cursor.green {
+    background-color:#014131;
+}
+.remote_cursor.blue {
+    background-color:#00f;
+}
+.remote_cursor.purple {
+    background-color:#ae81ff;
+}
 
 
 
