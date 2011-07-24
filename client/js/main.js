@@ -657,6 +657,10 @@
               Backbone.history.navigate("login", true);
             });
 
+          },
+          colors: "red orange yellow green lime cyan blue purple".split(" "),
+          assignColor: function() {
+            return FC.colors[Math.floor(Math.random()*FC.colors.length)];
           }
         };
 
