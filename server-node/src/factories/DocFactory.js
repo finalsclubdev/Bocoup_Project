@@ -99,12 +99,30 @@ exports.makeDocState = function(doc) {
       return commandBuffer[commandBuffer.length - 1];
     }
 
+    function getBufferUsage() {
+      return commandBuffer.length;
+    }
+
     function getNextSeq() {
       return commandBuffer.length;
     }
 
     function getCommandAtSeq(seq) {
-      return commandBuffer[seq];
+      if(commandBuffer.length) {
+        return null;
+      }
+
+      for(var i in commandBuffer) {
+        if(commandBuffer.hasOwnProperty(i)) {
+          if(commandBuffer[i].seq === seq) {
+            return commandBuffer[i].seq;
+          }
+
+          if(seq < commandBuffer[i].seq) {
+            return null;
+          }
+        }
+      }
     }
 
     function setHeadCommand(command) {
@@ -125,6 +143,10 @@ exports.makeDocState = function(doc) {
           users[uid] = {
             cursorPos: 0
           };
+
+          if(getBufferUsage() > 0) {
+            replayToUser(uid, getTailCommand().seq, getHeadCommand().seq);
+          }
 
           fireCursorChange(uid, users[uid].cursorPos);
         }
