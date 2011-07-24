@@ -39,6 +39,7 @@ if ( !Function.prototype.bind ) {
     this.doc = doc;
     // Create an ACE editor
     this.ace = ace.edit( elem );
+    this.ace.setHighlightActiveLine( false );
     // Lock our editor instance until we join the document
     this.lock();
     this.join();
