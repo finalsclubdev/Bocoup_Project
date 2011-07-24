@@ -444,6 +444,13 @@
             this.collaborators = new CollaboratorCollection();
             colab.addDocObserver("join.docView", _.bind(this.join, this));
             colab.addDocObserver("part.docView", _.bind(this.part, this));
+            // Temporary workaround to register remote users by their first
+            // cursor message, as join isn't working
+            colab.addDocObserver("cursor.docView", _.bind(function(data) {
+              if ( !this.collaborators.get(data.uid) ) {
+                this.collaborators.add(data);
+              }
+            },this));
           },
           events: {
             "click .toggleMessages": "toggleMessages"
@@ -516,8 +523,9 @@
             this.collaborators = options.collaborators;
             this.collaborators.bind("all",_.bind(function(ev) {
               switch(ev) {
-                case "reset":
+                case "add":
                 case "remove":
+                case "reset":
                   this.render();
                   break;
               }
