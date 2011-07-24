@@ -156,6 +156,13 @@
         Collaborator = User.extend({
           defaults: {
             cursorPos: 0
+          },
+          initialize: function() {
+            var uid = this.get("uid");
+            if ( !this.get("id") && uid ) {
+              this.set( {"id": uid} );
+              this.id = uid;
+            }
           }
         }),
 
