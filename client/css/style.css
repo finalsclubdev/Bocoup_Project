@@ -99,7 +99,7 @@ div.editor {
 }
 
 .remote_cursor {
-    background-color:#000;
+    background-color:#666;
     width:2px !important;
     height:10px;
     -webkit-animation-name: caret_pulse;
