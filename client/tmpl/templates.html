@@ -55,8 +55,19 @@
 
 <div class="template" id="doc">
   <form>
-    <h2>{{name}}</h2>
+    <h2>{{id}}</h2>
     {{{link "Return to Group" "group" gid}}}
+    <section class="collaborators">
+    </section>
     <div class="editor">{{text}}</div>
   </form>
+</div>
+
+<div class="template" id="collaboratorList">
+  <h3>Who's Here</h3>
+  <ul>
+    {{#each collaborators}}
+    <li>{{id}}</li>
+    {{/each}}
+  </ul>
 </div>

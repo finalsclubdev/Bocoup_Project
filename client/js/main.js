@@ -97,7 +97,6 @@
               return Backbone.history.navigate(groupid, true);
             } 
             $.when(group.docs.length || group.docs.fetch()).always(function() {
-
               doc = group.docs.get(docid);
               if ( !doc ) {
                 group.docs.create({
@@ -152,6 +151,19 @@
         UserCollection = Backbone.Collection.extend({
           model: User,
           localStorage: new Backbone.Store("Users")
+        }),
+
+        Collaborator = User.extend({
+          defaults: {
+            cursorPos: 0
+          }
+        }),
+
+        CollaboratorCollection = Backbone.Collection.extend({
+          model: Collaborator,
+          comparator: function(c) {
+            return c.id;
+          }
         }),
 
         Group = Backbone.Model.extend({
@@ -429,6 +441,9 @@
           initialize: function(options) {
             _.bindAll(this);
             this.doc = options.doc;
+            this.collaborators = new CollaboratorCollection();
+            colab.addDocObserver("join.docView", _.bind(this.join, this));
+            colab.addDocObserver("part.docView", _.bind(this.part, this));
           },
           events: {
             "click .toggleMessages": "toggleMessages"
@@ -451,6 +466,15 @@
             return msg;
 
           },
+          join: function(data) {
+            var collabs = _.map(data.users, function(u, uid) {
+              return _.extend({id: uid}, u);
+            });
+            this.collaborators.reset(collabs);
+          },
+          part: function(id) {
+            this.collaborators.remove(id);
+          },
           toggleMessages: function(e) {
             var $t = $(e.target);
             if (this.msgInterval) {
@@ -467,6 +491,10 @@
             var self = this,
                 data = this.doc.toJSON();
             $(this.el).html(this.template(data));
+            this.collaboratorList = new CollaboratorListView({
+              collaborators: this.collaborators,
+              el: $(this.el).find(".collaborators")[0]
+            });
             // Hack to allow DOM to repain before rendering editor
             // Prevent editor from being drawn to incorrect size in Firefox
             setTimeout(function() {
@@ -477,8 +505,35 @@
           destroy: function() {
             this.editor.destroy();
             delete FC.currentEditor;
+            colab.removeDocObserver("join.docView");
+            colab.removeDocObserver("part.docView");
           }
         }),
+
+        CollaboratorListView = Backbone.View.extend({
+          initialize: function(options) {
+            _.bindAll(this);
+            this.collaborators = options.collaborators;
+            this.collaborators.bind("all",_.bind(function(ev) {
+              switch(ev) {
+                case "reset":
+                case "remove":
+                  this.render();
+                  break;
+              }
+              console.log(ev);
+            },this));
+            this.render();
+          },
+          template: TMPL.collaboratorList,
+          render: function() {
+            console.log(this);
+            var data = {collaborators: this.collaborators.toJSON()};
+            $(this.el).html(this.template(data));
+            return this;
+          }
+
+        });
 
         FC = window.FC = {
           router: new Router(),
