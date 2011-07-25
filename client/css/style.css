@@ -91,6 +91,9 @@ div.editor {
   height:500px;
 }
 
+label {
+  display: block;
+}
 /* thanks to phreach on freenode */
 @-webkit-keyframes caret_pulse {
     0%   {opacity: 1;}

@@ -32,8 +32,10 @@
 </div>
 
 <div class="template" id="groupList">
-  <h2>Available Groups</h2>
-  Here's the list of groups
+  <h2>
+    Available Groups
+    <a href="#group/add">Add Group</a>
+  </h2>
   <ul>
   {{#each groups}}
     <li>{{{link id "group" id}}}</li>
@@ -42,15 +44,41 @@
 </div>
 
 <div class="template" id="group">
-  <h2>{{gid}}</h2>
+  <h2>{{id}} </h2>
   <a href="#groups">Groups</a>
   <a href="#" class="back">Back</a>
-  <h3>Documents</h3>
+  <h3>
+    Documents
+    {{{link "Add Document" "group" id "add"}}}
+  </h3>
   <ul>
   {{#each docs}}
     <li>{{{link id "group" gid id}}}</li>
   {{/each}}
   </ul>
+</div>
+
+<div class="template" id="groupEdit">
+  <form>
+    <label>
+      Group ID
+      <input type="text" name="name" value="{{gid}}" />
+    </label>
+    <button type="submit">Submit</button>
+    <a href="#groups">Cancel</a>
+  </form>
+</div>
+
+<div class="template" id="docAdd">
+  <form>
+    <label>
+      Document ID
+      <input type="text" name="name" value="" />
+    </label>
+    <input type="hidden" name="gid" value="{{gid}}" />
+    <button type="submit">Submit</button>
+    {{{link "Return to Group" "group" gid}}}
+  </form>
 </div>
 
 <div class="template" id="doc">

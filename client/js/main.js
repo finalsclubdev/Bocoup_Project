@@ -73,6 +73,9 @@
             });
           },
           group: function(id) {
+            if (id == "add") {
+              return FC.main.transition( new GroupEditView() );
+            }
             var group = FC.groups.get( id ),
                 respond = {
                   success: function(grp) {
@@ -96,6 +99,9 @@
               // automatically create it by going to #{groupid}
               return Backbone.history.navigate(groupid, true);
             } 
+            if (docid == "add") {
+              return FC.main.transition( new DocAddView( {group: group}) );
+            }
             $.when(group.docs.length || group.docs.fetch()).always(function() {
               doc = group.docs.get(docid);
               if ( !doc ) {
@@ -437,6 +443,38 @@
           }
         }),
 
+        GroupEditView = Backbone.View.extend({
+          initialize: function(options) {
+            _.bindAll(this);
+          },
+          events: {
+            "submit": "submit"
+          },
+          template: TMPL.groupEdit,
+          render: function() {
+            var data = this.options.group ? this.options.group.toJSON() : {};
+            $(this.el).html(this.template(data));
+            return this;
+          },
+          submit: function(e) {
+            e.preventDefault();
+            var form = $(e.target).serializeObject();
+            form.gid = form.name;
+            // This form validation should use the server exception
+            // but there is not an easy way to subscribe to it at present
+            if (form.gid.length < 6) {
+              alert("Group ID must be at least 6 characters long");
+              return false;
+            }
+            FC.groups.create(form, {
+              success: function(g) {
+                Backbone.history.navigate("group/"+g.get("gid"), true);
+              }
+            });
+            console.log(form);
+          }
+        }),
+
         // temporary data for generating messages
         tmp = {
           chars: "\n 12345\n67890!\n@#$%^&*()\nabcdef\nghijklmno\npqrstuv\nwxyz",
@@ -548,7 +586,38 @@
             return this;
           }
 
-        });
+        }),
+
+        DocAddView = Backbone.View.extend({
+          initialize: function(options) {
+            _.bindAll(this);
+          },
+          events: {
+            "submit": "submit"
+          },
+          template: TMPL.docAdd,
+          render: function() {
+            var data = {gid: this.options.group.id};
+            console.log(data);
+            $(this.el).html(this.template(data));
+            return this;
+          },
+          submit: function(e) {
+            e.preventDefault();
+            var form = $(e.target).serializeObject();
+            // This form validation should use the server exception
+            // but there is not an easy way to subscribe to it at present
+            if (form.name.length < 6) {
+              alert("Document ID must be at least 6 characters long");
+              return false;
+            }
+            this.options.group.docs.create(form, {
+              success: function(d) {
+                Backbone.history.navigate("group/"+form.gid+"/"+d.id, true);
+              }
+            });
+          }
+        }),
 
         FC = window.FC = {
           router: new Router(),
