@@ -22,17 +22,15 @@ var colab = (function(io) {
     },
 
     remove: function(observers, fn) {
-      var removed = false;
+      if( !(typeof fn == "string" || typeof fn == "function") ) {
+        throw 'That is not a function or observer name.';
+      }
       for(var i in observers) {
         if(observers.hasOwnProperty(i)) {
           if (observers[i][typeof fn == "function" ? "callback" : "eventName"] === fn) {
             observers.splice(i, 1);
-            removed = true;
           }
         }
-      }
-      if(!removed) {
-        throw 'That is not a function or bound observer name.';
       }
     }
   };
